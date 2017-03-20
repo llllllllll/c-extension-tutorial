@@ -1,0 +1,3 @@
+[submodule "submodules/cpython"]
+	path = submodules/cpython
+	url = git@github.com:python/cpython

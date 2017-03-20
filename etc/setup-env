@@ -1,0 +1,13 @@
+#!/usr/bin/bash
+
+# build a debug version of CPython
+pushd submodules/cpython
+./configure --with-pydebug
+make -j4
+popd
+
+# create a new virtualenv with our debug python build
+./submodules/cpython/python -m venv venv
+
+# add the python gdb debug script next to python binary in the venv
+cp submodules/cpython/Tools/gdb/libpython.py venv/bin/python-gdb.py
