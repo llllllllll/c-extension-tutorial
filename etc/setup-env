@@ -11,3 +11,11 @@ popd
 
 # add the python gdb debug script next to python binary in the venv
 cp submodules/cpython/Tools/gdb/libpython.py venv/bin/python-gdb.py
+
+source venv/bin/activate
+pip install sphinx
+pip install sphinx-rtd-theme
+
+pushd tutorial
+make html
+popd
