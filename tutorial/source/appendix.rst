@@ -100,6 +100,11 @@ like:
    };
 
 
+.. note::
+
+   Users should not access these fields directly, instead go through the API
+   macros: :c:func:`Py_REFCNT` and :c:func:`Py_TYPE`.
+
 .. _py-type-object:
 
 
@@ -137,8 +142,65 @@ A ``PyLongObject*`` can safely be cast to a :ref:`pyobjectptr`.
 :ref:`pyobjectptr`\s can be cast to ``PyLongObject*``\s only after a
 ``PyLong_Check``.
 
-CPython Functions
------------------
+
+``PyMethodDef``
+~~~~~~~~~~~~~~~
+
+https://docs.python.org/3.6/c-api/structures.html#c.PyMethodDef
+
+.. c:type:: PyMethodDef
+
+   Structure used to describe a method of an extension type. This structure has
+   four fields.
+
+.. c:member:: char* PyMethodDef.ml_name
+
+   The name of the method as a C string.
+
+.. c:member:: PyCFunction PyMethodDef.ml_meth
+
+   A pointer to the C implmenetation of the method.
+
+.. c:member:: int PyMethodDef.ml_flags
+
+   Flag bits indicating how to call :c:member:`~PyMethodDef.ml_meth` should be
+   called.
+
+.. c:member:: char* PyMethodDef.ml_doc
+
+   The contents of the method's docstring as a C string. If this is ``NULL``,
+   the docstring will be ``None`` in Python.
+
+CPython Functions and Macros
+----------------------------
+
+``Py_REFCNT``
+~~~~~~~~~~~~~
+
+https://docs.python.org/3.6/c-api/structures.html#c.Py_REFCNT
+
+.. c:function:: Py_ssize_t Py_REFCNT(ob)
+
+   Access the :ref:`reference count <ref-count>` of an object. This expands to:
+   ``(((PyObject*) (o))->ob_refcnt)``.
+
+   :param ob: The object to get the reference count of.
+   :return: The reference count of ``ob``.
+
+``Py_TYPE``
+~~~~~~~~~~~
+
+https://docs.python.org/3.6/c-api/structures.html#c.Py_TYPE
+
+.. c:function:: PyTypeObject* Py_TYPE(ob)
+
+   Access the Python type of an object as a :ref:`py-type-object`. This returns
+   a :ref:`borrowed reference <borrowed-reference>`. This macro expands to:
+   ``(((PyObject*) (o))->ob_type)``
+
+   :param ob: The object to get the type of.
+   :return: A borrowed reference to the type of ``ob``.
+
 
 .. _py-long-as-unsigned-long:
 
