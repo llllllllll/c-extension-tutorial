@@ -1,32 +1,55 @@
 How to Write and Debug C Extension Modules
 ==========================================
 
-Material for my PyCon tutorial.
+The CPython interpreter allows us implement modules in C for performance
+critical code or to interface with external libraries while presenting users
+with a high level Python API. This tutorial will teach you how to leverage to
+power of C in your Python projects.
 
-The material is in the ``tutorial`` directory.
+We will start by explaining the C representation of Python objects and how to
+manipulate them from within C. We will then move on to implementing functions in
+C for use in Python. We will discuss reference counting and correct exception
+handling. We will also talk about how to package and build your new extension
+module so that it may be shared on PyPI. (We will only be covering building
+extension modules on GNU/Linux and OSX, not Windows).
 
-What to Install Before Attending
---------------------------------
+After the break, we will show how to implement a new type in C. This will cover
+how to hook into various protocols and properly support cyclic garbage
+collection. We will also discuss techniques for debugging C extension modules
+with gdb using the CPython gdb extension.
 
-Prior to the tutorial, attendees need to install a C89 compatible C compiler and
-gdb.
+Install Steps
+-------------
+
+Prior to the tutorial, attendees need to install a git, a C89 compatible C
+compiler and gdb.
 
 For the C compiler: I recommend gcc, but clang works as well.
 The tutorial will be using gdb specific features so gdb is reqiured. Other C
 debuggers like lldb will not work.
 
-Building the Tutorial
----------------------
+Once all of the system packages have been installed, run the following commands
+in a terminal:
+
+.. code-block:: bash
+
+   $ git clone --recursive git@github.com:llllllllll/c-extension-tutorial
+   $ cd c-extension-tutorial
+   $ source etc/setup-env
+
+The ``setup-env`` script will compile a debug version of CPython 3.6 and create
+a local virtual env with this new interpreter. This ensures that everyone is
+using the same version of CPython with the same compile time flags.
+
+Viewing the Tutorial
+--------------------
 
 The tutorial is structured as a sphinx project. This allows the tutorial to be
 viewed from a standard browser or hosted online.
 
-To build the sphinx project, setup the environment with ``$
-./etc/setup-env``. This script builds the version of CPython needed and installs
-all of the needed packages.
+The material can be viewed in a browser by opening
+``tutorial/build/html/index.html``, for example:
 
-After setting up the environment, ``cd`` into the ``tutorial`` directory and run
-``$ make html``.
+.. code-block:: bash
 
-The material can now be viewed in a browser by opening
-``tutorial/build/html/index.html``
+   $ ${BROWSER} tutorial/build/html/index.html
