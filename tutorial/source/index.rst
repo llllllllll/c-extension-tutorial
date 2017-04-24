@@ -8,6 +8,7 @@ How to Write and Debug C Extension Modules
    what-is-an-extension-module
    c-level-representation
    writing-a-function
+   building-and-importing
    appendix
 
 

@@ -26,11 +26,11 @@ Let's begin with a simple C function to compute Fibonacci numbers:
    }
 
 Now that we have a a C function we need to provide a way to convert our
-:ref:`pyobjectptr`\s to and from C ``unsigned long`` objects to invoke this from
-Python.
+:c:type:`PyObject*`\s to and from C ``unsigned long`` objects to invoke this
+from Python.
 
-:ref:`py-long-object`
----------------------
+:c:type:`PyLongObject*`
+-----------------------
 
 Python ``int`` objects are concretely typed as a ``PyLongObject``.
 
@@ -81,12 +81,172 @@ This structure defines the name of the function as it will appear in Python, the
 pointer to the C implementation, information about how to invoke the function,
 and finally the docstring.
 
-A ``PyMethodDef`` for our ``pyfib`` function looks like:
+A :c:type:`PyMethodDef` for our ``pyfib`` function looks like:
 
 .. code-block:: c
 
    PyDOC_STRVAR(fib_doc, "computes the nth Fibonacci number);
-   PyMethodDef fib_method = {"fib",
-                             (PyCFunction) pyfib,
-                             METH_O,
-                             fib_doc};
+   PyMethodDef fib_method = {
+       "fib",                /* The name as a C string. */
+       (PyCFunction) pyfib,  /* The C function to invoke. */
+       METH_O,               /* Flags telling Python how to invoke ``pyfib`` */
+       fib_doc,              /* The docstring as a C string. */
+   };
+
+
+:c:func:`PyDoc_STRVAR`
+~~~~~~~~~~~~~~~~~~~~~~
+
+We don't just use a normal ``const char*`` for the docstring because CPython can
+be compiled to not include docstrings. This is useful on platforms with less
+available RAM. To properly respect this compile time option we wrap all
+docstrings in the :c:func:`PyDoc_STRVAR` macro.
+
+:c:macro:`METH_O`
+~~~~~~~~~~~~~~~~~
+
+For our function we only accept a single argument as a :c:type:`PyObject*` so we
+can use the :c:macro:`METH_O` flag. For a list of the available flags see:
+:c:member:`PyMethodDef.ml_flags`.
+
+Creating a Python Module
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The last thing we need to do to export our ``fib`` function to Python is put it
+in a module to be imported. Like a :c:type:`PyMethodDef`, a
+:c:type:`PyModuleDef` is some metadata which describes a Python module object.
+
+.. code-block:: c
+
+   PyMethodDef methods[] = {
+       {"fib", (PyCFunction) pyfib, METH_O, fib_doc},
+       {NULL},
+   };
+
+   PyDoc_STRVAR(fib_module_doc, "provides a Fibonacci function");
+
+   PyModuleDef fib_module = {
+       PyModuleDef_HEAD_INIT,
+       "fib",
+       fib_module_doc,
+       -1,
+       methods,
+       NULL,
+       NULL,
+       NULL,
+       NULL
+   };
+
+The module initialization always starts with ``PyModuleDef_HEAD_INIT`` to setup
+the part of the ``PyModuleDef`` which is managed by CPython.
+
+Next is the name of the module as a C string.
+
+After the name is the module's docstring. Like in a :c:type:`PyMethodDef`, we
+need to use :c:func:`PyDoc_STRVAR` to define the docstring so that it can be
+disabled at compile time.
+
+The ``-1`` is the size of the module's global state. For our simple ``fib``
+module we don't have any state so this can be set to ``-1``.
+
+Next is a ``NULL`` terminated array of methods to put at module scope in this
+module. We have created an array with just our ``pyfib`` function, but we could
+include more than one function if we needed to.
+
+Finally we have a bunch of function pointers for managing the module's global
+state. When we don't have any state (the size if ``-1``), we can set these all
+to ``NULL``.
+
+Making The Shared Object Importable
+-----------------------------------
+
+With our function and module defined, we need to tell CPython how to import our
+module. To do that we need to define a single function with type
+:c:macro:`PyMODINIT_FUNC` named ``PyInit_{name}`` where ``name`` is the name of
+our module.
+
+This function will be executed the first time someone writes ``import fib.fib``
+from python. This can be thought of as the code that runs at "module scope" in a
+normal Python file.
+
+At the end of our function we need to return the newly created module. To
+actually create a :c:type:`PyObject*` from a :c:type:`PyModule_Def` we can use
+:c:func:`PyModule_Create`.
+
+An example :c:macro:`PyMODINIT_FUNC` for our fib module looks like:
+
+.. code-block:: c
+
+   PyMODINIT_FUNC
+   PyInit_fib(void)
+   {
+       return PyModule_Create(&fib_module);
+   }
+
+Compiling the Module
+--------------------
+
+When compiling an extension module we want to start with a normal setuptools
+``setup.py`` file. For example:
+
+.. code-block:: python
+
+   from setuptools import setup, find_packages
+
+
+   setup(
+       name='fib',
+       version='0.1.0',
+       packages=find_packages(),
+       license='GPL-2',
+       classifiers=[
+           'Development Status :: 3 - Alpha',
+           'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+           'Natural Language :: English',
+           'Programming Language :: Python :: 3 :: Only',
+           'Programming Language :: Python :: Implementation :: CPython',
+       ],
+   )
+
+
+This defines a new package called ``fib`` with version '0.1.0' and some other
+metadata.
+
+.. note::
+
+   In the classifiers we indicate:
+
+   ``Programming Language :: Python :: Implementation :: CPython``
+
+   This indicates that our package requires CPython extension modules or
+   implementation details and would not work on PyPy, Jython, or other Python
+   implementations.
+
+With the standard boilerplate in place we need to add the C extension specific
+parts. Start by importing the ``Extension`` type from ``setuptools``:
+
+.. code-block:: python
+
+   from setuptools import setup, find_packages, Extension
+
+Next, we need to add a list of all of the extension modules we need build to our
+call to ``setup``:
+
+.. code-block:: python
+
+   setup(
+       ...,  # the arguments from before
+       ext_modules=[
+           Extension(
+               # the qualified name of the extension module to build
+               'fib.fib',
+               # the files to compile into our module relative to ``setup.py``
+               ['fib/fib.c'],
+           ),
+       ],
+   )
+
+The ``Extension`` class makes sure we get the correct CPython headers and flags
+which were used to build the CPython invoking ``setup.py``. We can customize the
+build process with arguments to ``Extension``, but the default is enough to get
+us started.
