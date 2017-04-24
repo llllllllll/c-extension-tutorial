@@ -1,4 +1,4 @@
-from setuptools import setup, Extension, find_packages
+from setuptools import setup, find_packages, Extension
 
 
 setup(
@@ -12,8 +12,6 @@ setup(
         'Natural Language :: English',
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: Implementation :: CPython',
-        'Operating System :: POSIX',
-        'Topic :: Software Development :: Pre-processors',
     ],
     ext_modules=[
         Extension(
