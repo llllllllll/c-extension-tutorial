@@ -393,3 +393,63 @@ CPython Functions and Macros
 .. c:function:: PyObject* PyModule_Create(PyModuleDef* def)
 
    Create a new Python module object from a :c:type:`PyModuleDef*`.
+
+Error Handling
+--------------
+
+.. c:function:: void PyErr_SetString(PyObject* type, const char* message)
+
+   https://docs.python.org/3.6/c-api/exceptions.html#c.PyErr_SetString
+
+   Raise an exception of the given type with the given message.
+
+   :param PyObject* type: The exception type to raise.
+   :param const char* message: The exception message.
+
+.. c:function:: PyObject* PyErr_Format(PyObject* type, const char* format, ...)
+
+   https://docs.python.org/3.6/c-api/exceptions.html#c.PyErr_Format
+
+   Raise an exception of the given type with a message created from a format
+   string and values.
+
+   :param PyObject* type: The exception type to raise.
+   :param const char* format: The exception format string.
+   :param ...: The values to format into ``format``.
+   :return: Always ``NULL``.
+
+.. c:function:: PyObject* PyErr_NoMemory()
+
+   https://docs.python.org/3.6/c-api/exceptions.html#c.PyErr_NoMemory
+
+   Raise an exception that indicates that memory could not be allocated.
+
+   :return: Always ``NULL``.
+
+.. c:function:: PyObject* PyErr_Occurred()
+
+   https://docs.python.org/3.6/c-api/exceptions.html#c.PyErr_Occurred
+
+   Return a :ref:`borrowed reference <borrowed-reference>` to the type of the
+   currently raised exception. If no exception is raised, return ``NULL``.
+
+   This should just be used to check if an exception is raised, do not compare
+   this value to exception types. To compare exceptions to an exception type
+   use: :c:func:`PyErr_ExceptionMatches`.
+
+.. c:function:: int PyErr_ExceptionMatches(PyObject* exc)
+
+   https://docs.python.org/3.6/c-api/exceptions.html#c.PyErr_ExceptionMatches
+
+   Compare the currently raised exception type to ``exc``. Return ``true`` if
+   the currently raised exception is an instance of ``exc``.
+
+   :param PyObject* exc: The exception type to compare the currently raised
+                         exception to.
+   :return: ``1`` if the current exception is a subclass of ``exc``, ``0`` if it
+            is not a subclass of ``exc``, and ``-1`` if an error occurs.
+
+   .. note::
+
+      This can only be called if an exception is currently raised. This can be
+      checked with :c:func:`PyErr_Occurred`.

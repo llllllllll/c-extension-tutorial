@@ -9,6 +9,8 @@ How to Write and Debug C Extension Modules
    c-level-representation
    writing-a-function
    building-and-importing
+   error-handling
+   abstract-api
    appendix
 
 
