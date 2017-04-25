@@ -29,6 +29,12 @@ Now that we have a a C function we need to provide a way to convert our
 :c:type:`PyObject*`\s to and from C ``unsigned long`` objects to invoke this
 from Python.
 
+.. note::
+
+   It is important to declare all functions as ``static``. This is normally good
+   practice in C but it is especially important when linking with CPython which
+   is a very large project. We don't want to pollute the namespace.
+
 :c:type:`PyLongObject*`
 -----------------------
 
