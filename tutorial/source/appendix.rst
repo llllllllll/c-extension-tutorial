@@ -126,7 +126,6 @@ CPython Structures
    Users should not access these fields directly, instead go through the API
    macros: :c:func:`Py_REFCNT` and :c:func:`Py_TYPE`.
 
-
 ``PyTypeObject``
 ~~~~~~~~~~~~~~~~
 
@@ -318,6 +317,28 @@ A ``PyLongObject*`` can safely be cast to a :c:type:`PyObject*`.
    needs to be named: ``PyInit_{name}`` where ``name`` is the name of the
    module.
 
+Global Sentinels
+----------------
+
+``Py_None``
+~~~~~~~~~~~
+
+.. c:var:: PyObject* Py_None
+
+   A global reference to ``None``.
+
+.. c:macro:: Py_RETURN_NONE
+
+   Shorthand for:
+
+   .. code-block:: c
+
+      Py_INCREF(Py_None);
+      return Py_None;
+
+   This is useful because people often forget that they need to call
+   :c:func:`Py_INCREF` on :c:data:`Py_None` even though it is a global object.
+
 CPython Functions and Macros
 ----------------------------
 
@@ -393,6 +414,203 @@ CPython Functions and Macros
 .. c:function:: PyObject* PyModule_Create(PyModuleDef* def)
 
    Create a new Python module object from a :c:type:`PyModuleDef*`.
+
+``PyObject_Repr``
+~~~~~~~~~~~~~~~~~
+
+.. c:function:: PyObject* PyObject_Repr(PyObject* ob)
+
+   Get the string representation of ``ob``. This is the same as ``repr(ob)`` in
+   Python.
+
+   :param PyObject* ob: The object to repr.
+   :return: A :ref:`new reference <new-reference>` to the string representation
+            of ``ob``.
+
+``PyObject_GetAttr``
+~~~~~~~~~~~~~~~~~~~~
+
+.. c:function:: PyObject* PyObject_GetAttr(PyObject* ob, PyObject* attr_name)
+
+   Lookup an attribute on a Python object. This is the same as ``getattr(ob,
+   attr_name)`` in Python.
+
+   :param PyObject* ob: The object to lookup the attribute on.
+   :param PyObject* attr_name: The name of the attribute to lookup.
+   :return: The attribute name ``attr_name`` on ``ob`` or ``NULL`` with an
+            exception set if the attribute doesn't exist.
+
+
+``PyObject_SetAttr``
+~~~~~~~~~~~~~~~~~~~~
+
+.. c:function:: int PyObject_SetAttr(PyObject* ob, PyObject* attr_name, PyObject* value)
+
+   Set an attribute on a Python object. This is the same as ``setattr(ob,
+   attr_name, value)`` in Python.
+
+   :param PyObject* ob: The object to set the attribute on.
+   :param PyObject* attr_name: The name of the attribute to set.
+   :param PyObject* value: The value of the attribute to set.
+   :return: True with an exception set if an error occurred, otherwise False.
+
+``PyObject_RichCompare``
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. c:function:: PyObject* PyObject_RichCompareBool(PyObject* ob_1, PyObject* ob_2, int op_id)
+
+   Compare ``ob_1`` and ``ob_2`` with some comparison operator.
+
+   :param PyObject* ob_1: The first operand.
+   :param PyObject* ob_2: The second operand.
+   :param int op_id: The operator to use: {:c:macro:`Py_LT`, :c:macro:`Py_LE`,
+                     :c:macro:`Py_EQ`, :c:macro:`Py_NE`, :c:macro:`Py_GT`,
+                     :c:macro:`Py_GE`}.
+   :return: The result of the operator.
+
+
+``PyObject_RichCompareBool``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. c:function:: int PyObject_RichCompareBool(PyObject* ob_1, PyObject* ob_2, int op_id)
+
+   Compare ``ob_1`` and ``ob_2`` with some comparison operator and convert the
+   values to a C boolean.
+
+   :param PyObject* ob_1: The first operand.
+   :param PyObject* ob_2: The second operand.
+   :param int op_id: The operator to use: {:c:macro:`Py_LT`, :c:macro:`Py_LE`,
+                     :c:macro:`Py_EQ`, :c:macro:`Py_NE`, :c:macro:`Py_GT`,
+                     :c:macro:`Py_GE`}.
+   :return: The status of the operator or -1 with an exception set if an error
+            occurred.
+
+.. c:macro:: Py_LT
+
+   ``ob_1 < ob_2``
+
+.. c:macro:: Py_LE
+
+   ``ob_1 <= ob_2``
+
+.. c:macro:: Py_EQ
+
+   ``ob_1 == ob_2``
+
+   .. note::
+
+      :c:func:`PyObject_RichCompareBool` will return True if ``ob_1 is ob_2``.
+
+.. c:macro:: Py_NE
+
+   ``ob_1 != ob_2``
+
+   .. note::
+
+      :c:func:`PyObject_RichCompareBool` will return False of ``ob_1 is ob_2``.
+
+.. c:macro:: Py_GT
+
+   ``ob_1 > ob_2``
+
+.. c:macro:: Py_GE
+
+   ``ob_1 >= ob_2``
+
+.. _number-api:
+
+Number API
+----------
+
+The Number API is sort of like the ``operator`` module in Python.
+
+For each function ``PyNumber_Op`` there is a matching ``PyNumber_InPlaceOp``
+which is an augmented assignment version. For example: ``PyNumber_InPlaceAdd(a,
+b)`` is the same as ``a += b; return a``. This still returns a :ref:`new
+reference <new-reference>` to ``a`` which the caller owns.
+
+.. c:function:: PyObject* PyNumber_Add(PyObject* a, PyObject* b)
+
+   :return: A new reference to ``a + b`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_Subtract(PyObject* a, PyObject* b)
+
+   :return: A new reference to ``a - b`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_Subtract(PyObject* a, PyObject* b)
+
+   :return: A new reference to ``a * b`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_FloorDivide(PyObject* a, PyObject* b)
+
+   :return: A new reference to ``a // b`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_TrueDivide(PyObject* a, PyObject* b)
+
+   :return: A new reference to ``a / b`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_Remainder(PyObject* a, PyObject* b)
+
+   :return: A new reference to ``a % b`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_Divmod(PyObject* a, PyObject* b)
+
+   :return: A new reference to ``divmod(a, b)`` or ``NULL`` with an exception
+            set.
+
+.. c:function:: PyObject* PyNumber_Power(PyObject* a, PyObject* b, PyObject* c)
+
+   :param PyObject* a: The base.
+   :param PyObject* b: The exponent.
+   :param PyObject* c: Number to take the exponent modulo. If provided, this
+                       function is like ``(a ** b) % c``. To ignore this value
+                       pass :c:data:`Py_None`.
+   :return: A new reference to ``pow(a, b, c)`` or ``NULL`` with an exception
+            set.
+
+.. c:function:: PyObject* PyNumber_Negative(PyObject* a)
+
+   :return: A new reference to ``-a`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_Positive(PyObject* a)
+
+   :return: A new reference to ``+a`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_Absolute(PyObject* a)
+
+   :return: A new reference to ``abs(a)`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_Invert(PyObject* a)
+
+   :return: A new reference to ``~a`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_Lshift(PyObject* a, PyObject* b)
+
+   :return: A new reference to ``a << b`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_Rshift(PyObject* a, PyObject* b)
+
+   :return: A new reference to ``a >> b`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_And(PyObject* a, PyObject* b)
+
+   .. note::
+
+      This is bitwise ``and``, not boolean ``and``.
+
+   :return: A new reference to ``a & b`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_Xor(PyObject* a, PyObject* b)
+
+   :return: A new reference to ``a ^ b`` or ``NULL`` with an exception set.
+
+.. c:function:: PyObject* PyNumber_Or(PyObject* a, PyObject* b)
+
+   .. note::
+
+      This is bitwise ``or``, not boolean ``or``.
+
+   :return: A new reference to ``a | b`` or ``NULL`` with an exception set.
 
 Error Handling
 --------------
