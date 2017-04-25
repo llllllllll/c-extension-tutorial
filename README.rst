@@ -3,7 +3,7 @@ How to Write and Debug C Extension Modules
 
 The CPython interpreter allows us implement modules in C for performance
 critical code or to interface with external libraries while presenting users
-with a high level Python API. This tutorial will teach you how to leverage to
+with a high level Python API. This tutorial will teach you how to leverage the
 power of C in your Python projects.
 
 We will start by explaining the C representation of Python objects and how to
