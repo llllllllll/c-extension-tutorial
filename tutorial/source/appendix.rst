@@ -339,6 +339,20 @@ Global Sentinels
    This is useful because people often forget that they need to call
    :c:func:`Py_INCREF` on :c:data:`Py_None` even though it is a global object.
 
+``Py_True``
+~~~~~~~~~~~
+
+.. c:var:: PyObject* Py_True
+
+   A global reference to ``True``.
+
+``Py_False``
+~~~~~~~~~~~~
+
+.. c:var:: PyObject* Py_False
+
+   A global reference to ``False``.
+
 CPython Functions and Macros
 ----------------------------
 
@@ -454,6 +468,23 @@ CPython Functions and Macros
    :param PyObject* value: The value of the attribute to set.
    :return: True with an exception set if an error occurred, otherwise False.
 
+``PyObject_IsTrue``
+~~~~~~~~~~~~~~~~~~~
+
+.. c:function:: int PyObject_IsTrue(PyObject* ob)
+
+   Check the truthiness of an object. This is the same as ``bool(ob)`` in
+   Python.
+
+   .. note::
+
+      This is not the same as ``ob is True`` in Python, this name is slightly
+      confusing.
+
+   :param PyObject* ob: The object to check the truthiness of.
+   :return: True if the object is truthy, False if the object is falsey, -1 with
+            an exception raised if an error occurred.
+
 ``PyObject_RichCompare``
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -516,6 +547,185 @@ CPython Functions and Macros
 .. c:macro:: Py_GE
 
    ``ob_1 >= ob_2``
+
+``PyArg_ParseTupleAndKeywords``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. c:function:: int PyArg_ParseTupleAndKeywords(PyObject* args, PyObject* kwargs, const char* format, char** keywords, ...)
+
+   Parse the argument tuple and dictionary for a :c:type:`PyCFunction`.
+
+   :param PyObject* args: The argument tuple passed to the
+                          :c:type:`PyCFunction`.
+   :param PyObject* kwargs: The keyword argument dictionary passed to the
+                            :c:type:`PyCFunction`. This *can* be ``NULL``.
+   :param const char* format: The format string. see :ref:`format characters
+                              <arg-format>` for more information.
+   :param char** keywords: The names of the keyword arguments that this function
+                           accepts as a ``NULL`` terminated array.
+   :param ...: Variadic values based on ``format``.
+   :return: True with an exception set if an error occurred, otherwise False.
+
+
+Example
+```````
+
+The following example defines a function called ``function_name`` which accepts
+three arguments:
+
+- ``a``: A Python ``str`` object to be converted into a ``char*``.
+- ``b``: A Python ``int`` object to be converted into an ``int``.
+- ``c``: An optional arbitrary Python object.
+
+.. code-block:: c
+
+   static PyObject*
+   function_name(PyObject* self, PyObject* args, PyObject* kwargs)
+   {
+       /* the names of the arguments */
+       static char* keywords[] = {"a", "b", "c", NULL};
+
+       /* C declarations for our arguments */
+       char* string;
+       int integer;
+       PyObject* object = NULL;
+
+       if (PyArg_ParseTupleAndKeywords(args,
+                                       kwargs,
+                                       "si|O:function_name",
+                                       &string,   /* s /*
+                                       &integer,  /* i */
+                                       &object    /* O */)) {
+           /* failed to parse arguments, an error is set */
+           return NULL;
+       }
+
+       if (!object) {
+           /* ``c`` was not passed, set its default value here */
+       }
+
+       /* rest */
+   }
+
+.. _arg-format:
+
+Format Characters
+`````````````````
+
+Below is a subset of commonly used format characters, see
+https://docs.python.org/3/c-api/arg.html#strings-and-buffers for a full list.
+
+``s`` (str) [const char*]
+'''''''''''''''''''''''''
+
+Accept a ``str`` argument as a ``char*``. A reference to a ``char*`` should
+appear in the variadic argument list at this index.
+
+``z`` (str) [const char*]
+'''''''''''''''''''''''''
+
+Accept a ``str`` argument as a ``char*``. A reference to a ``char*`` should
+appear in the variadic argument list at this index. This argument can also be
+``None`` in which case the pointer will be ``NULL``.
+
+``b`` (int) [unsigned char]
+'''''''''''''''''''''''''''
+
+Accept an ``int`` argument as an ``unsigned char``. A reference to an ``unsigned
+char`` should appear in the variadic argument list at this index.
+
+``h`` (int) [short]
+'''''''''''''''''''
+
+Accept an ``int`` argument as a ``short``. A reference to a ``short`` should
+appear in the variadic argument list at this index.
+
+``i`` (int) [int]
+'''''''''''''''''
+
+Accept an ``int`` argument as an ``int``. A reference to an ``int`` should
+appear in the variadic argument list at this index.
+
+``i`` (int) [long]
+''''''''''''''''''
+
+Accept an ``int`` argument as a ``long``. A reference to a ``long`` should
+appear in the variadic argument list at this index.
+
+``C`` (str of length 1) [int]
+'''''''''''''''''''''''''''''
+
+Accept a ``str`` of length 1 argument as an ``int``. A reference to an ``int``
+should appear in the variadic argument list at this index.
+
+``f`` (float) [float]
+'''''''''''''''''''''
+
+Accept a ``float`` argument as a ``float``. A reference to a ``float`` should
+appear in the variadic argument list at this index.
+
+``d`` (float) [double]
+''''''''''''''''''''''
+
+Accept a ``float`` argument as a ``double``. A reference to a ``double`` should
+appear in the variadic argument list at this index.
+
+``O`` (object) [:c:type:`PyObject*`\]
+'''''''''''''''''''''''''''''''''''''
+
+Accept an object argument as a :c:type:`PyObject*`. This is a :ref:`borrowed
+reference <borrowed-reference>`. A reference to a :c:type:`PyObject*` should
+appear in the variadic argument list at this index.
+
+``O!`` (object) [:c:type:`PyTypeObject*`, :c:type:`PyObject*`\]
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Accept an argument as a :c:type:`PyObject*`. This object must be of a particular
+Python type. This is a :ref:`borrowed reference <borrowed-reference>`. This
+format requires two values in the variadic argument list:
+
+1. A :c:type:`PyTypeObject*` to check the type of the argument against. Parsing
+   will fail if the object is not an instance of this type.
+2. A reference to a :c:type:`PyObject*` to write the result.
+
+``p`` (bool) [int]
+''''''''''''''''''
+
+Accept any argument and check the truthiness of the value. A reference to an
+``int`` should appear in the variadic argument list at this index. This is like
+accepting an object as ``O`` and then using :c:func:`PyObject_IsTrue`.
+
+.. warning::
+
+   The CPython docs mention converters for ``unsigned`` integral types which do
+   *not* do overflow checking. These converters should not be used because they
+   fail to handle negative integers. The proper way to handle these values is to
+   accept them as ``O`` and use one of the ``PyLong_As*`` conversion functions.
+
+Special Characters
+``````````````````
+
+``|``
+'''''
+
+All arguments following a pipe are optional. If an argument is not passed, the
+value of the reference in the variadic argument list is unchanged.
+
+``$``
+'''''
+
+All arguments following a dollar sign are keyword only arguments.
+
+.. note::
+
+   The CPython docs say that this can only appear after a ``|``; however, this
+   is not actually true. You may have required keyword only arguments.
+
+``:``
+'''''
+
+This marks the end of the format list. Any text after this is used as the name
+of the function when generating error messages.
 
 .. _number-api:
 

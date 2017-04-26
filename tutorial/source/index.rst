@@ -11,6 +11,7 @@ How to Write and Debug C Extension Modules
    building-and-importing
    error-handling
    abstract-api
+   fancy-argument-parsing
    appendix
 
 
