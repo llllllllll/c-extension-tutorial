@@ -1,10 +1,79 @@
 Building and Importing
 ======================
 
+Compiling the Module
+--------------------
+
+The most common way to build CPython extension modules is to use setuptools and
+a ``setup.py`` file. We start with a normal setuptools ``setup.py`` file, for
+example:
+
+.. code-block:: python
+
+   from setuptools import setup, find_packages
+
+
+   setup(
+       name='fib',
+       version='0.1.0',
+       packages=find_packages(),
+       license='GPL-2',
+       classifiers=[
+           'Development Status :: 3 - Alpha',
+           'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+           'Natural Language :: English',
+           'Programming Language :: Python :: 3 :: Only',
+           'Programming Language :: Python :: Implementation :: CPython',
+       ],
+   )
+
+
+This defines a new package called ``fib`` with version '0.1.0' and some other
+metadata.
+
+.. note::
+
+   In the classifiers we indicate:
+
+   ``Programming Language :: Python :: Implementation :: CPython``
+
+   This indicates that our package requires CPython extension modules or
+   implementation details and would not work on PyPy, Jython, or other Python
+   implementations.
+
+With the standard boilerplate in place we need to add the C extension specific
+parts. Start by importing the ``Extension`` type from ``setuptools``:
+
+.. code-block:: python
+
+   from setuptools import setup, find_packages, Extension
+
+Next, we need to add a list of all of the extension modules we need build to our
+call to ``setup``:
+
+.. code-block:: python
+
+   setup(
+       ...,  # the arguments from before
+       ext_modules=[
+           Extension(
+               # the qualified name of the extension module to build
+               'fib.fib',
+               # the files to compile into our module relative to ``setup.py``
+               ['fib/fib.c'],
+           ),
+       ],
+   )
+
+The ``Extension`` class makes sure we get the correct CPython headers and flags
+which were used to build the CPython invoking ``setup.py``. We can customize the
+build process with arguments to ``Extension``, but the default is enough to get
+us started.
+
 Building
 --------
 
-To start, let's make sure our build environment is working.
+Let's make sure our build environment is working.
 
 Run the following commands from the repo root:
 
