@@ -4,19 +4,20 @@ set -e
 
 if [ `uname` == "Linux" ];then
     PYTHON_EXE=python
+    CPPFLAGS=''
+    LDFLAGS=''
 elif [ `uname` == "Darwin" ];then
     PYTHON_EXE=python.exe
-
-    sed -i.bak s:/usr/local/ssl:`brew --prefix openssl`:g submodules/cpython/setup.py
+    CPPFLAGS="-I$(brew --prefix openssl)/include"
+    LDLAGS="-L$(brew --prefix openssl)/lib"
 else
     echo "Only GNU+Linux and OSX are supported"
     exit 1
 fi
 
-
 # build a debug version of CPython
 pushd submodules/cpython
-./configure --with-pydebug
+CPPFLAGS=$CPPFLAGS LDFLAGS=$LDFLAGS ./configure --with-pydebug
 make -j4
 popd
 
