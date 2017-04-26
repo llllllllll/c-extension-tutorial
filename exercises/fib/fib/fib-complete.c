@@ -14,7 +14,7 @@ pyfib(PyObject* self, PyObject* args, PyObject* kwargs)
 
     if (!PyArg_ParseTupleAndKeywords(args,
                                      kwargs,
-                                     "O|OO:fib",
+                                     "O|$OO:fib",
                                      keywords,
                                      &n_ob,
                                      &a,
