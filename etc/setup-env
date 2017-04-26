@@ -1,13 +1,24 @@
 #!/usr/bin/bash
 
+set -e
+
 # build a debug version of CPython
 pushd submodules/cpython
 ./configure --with-pydebug
 make -j4
 popd
 
+if [ `uname` == "Linux" ];then
+    PYTHON_EXE=python
+elif [ `uname` == "Darwin" ];then
+    PYTHON_EXE=python.exe
+else
+    echo "Only GNU+Linux and OSX are supported"
+    exit 1
+fi
+
 # create a new virtualenv with our debug python build
-./submodules/cpython/python -m venv venv
+./submodules/cpython/$PYTHON_EXE -m venv venv
 
 # add the python gdb debug script next to python binary in the venv
 cp submodules/cpython/Tools/gdb/libpython.py venv/bin/python-gdb.py
