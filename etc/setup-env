@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 set -e
 
@@ -7,8 +7,7 @@ if [ `uname` == "Linux" ];then
 elif [ `uname` == "Darwin" ];then
     PYTHON_EXE=python.exe
 
-    brew install openssl
-    sed s:/usr/local/ssl:`brew --prefix openssl`:g -i submodules/cpython/setup.py
+    sed -i.bak s:/usr/local/ssl:`brew --prefix openssl`:g submodules/cpython/setup.py
 else
     echo "Only GNU+Linux and OSX are supported"
     exit 1

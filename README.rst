@@ -22,7 +22,7 @@ Install Steps
 -------------
 
 Prior to the tutorial, attendees need to install a git, a C89 compatible C
-compiler and gdb.
+compiler and gdb. OSX users will also need to install ``brew``.
 
 For the C compiler: I recommend gcc, but clang works as well.
 The tutorial will be using gdb specific features so gdb is reqiured. Other C
@@ -33,7 +33,7 @@ in a terminal:
 
 .. code-block:: bash
 
-   $ git clone --recursive git@github.com:llllllllll/c-extension-tutorial
+   $ git clone --recursive https://github.com/llllllllll/c-extension-tutorial.git
    $ cd c-extension-tutorial
    $ source etc/setup-env
 
