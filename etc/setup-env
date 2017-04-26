@@ -2,22 +2,22 @@
 
 set -e
 
+# build a debug version of CPython
+pushd submodules/cpython
+
 if [ `uname` == "Linux" ];then
     PYTHON_EXE=python
-    CPPFLAGS=''
-    LDFLAGS=''
+    ./configure --with-pydebug
 elif [ `uname` == "Darwin" ];then
     PYTHON_EXE=python.exe
-    CPPFLAGS="-I$(brew --prefix openssl)/include"
-    LDLAGS="-L$(brew --prefix openssl)/lib"
+    CPPFLAGS="-I$(brew --prefix openssl)/include" \
+            LDLAGS="-L$(brew --prefix openssl)/lib" \
+            ./configure --with-pydebug
 else
     echo "Only GNU+Linux and OSX are supported"
     exit 1
 fi
 
-# build a debug version of CPython
-pushd submodules/cpython
-CPPFLAGS=$CPPFLAGS LDFLAGS=$LDFLAGS ./configure --with-pydebug
 make -j4
 popd
 
