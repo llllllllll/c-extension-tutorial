@@ -2,20 +2,24 @@
 
 set -e
 
+if [ `uname` == "Linux" ];then
+    PYTHON_EXE=python
+elif [ `uname` == "Darwin" ];then
+    PYTHON_EXE=python.exe
+
+    brew install openssl
+    sed s:/usr/local/ssl:`brew --prefix openssl`:g -i submodules/cpython/setup.py
+else
+    echo "Only GNU+Linux and OSX are supported"
+    exit 1
+fi
+
+
 # build a debug version of CPython
 pushd submodules/cpython
 ./configure --with-pydebug
 make -j4
 popd
-
-if [ `uname` == "Linux" ];then
-    PYTHON_EXE=python
-elif [ `uname` == "Darwin" ];then
-    PYTHON_EXE=python.exe
-else
-    echo "Only GNU+Linux and OSX are supported"
-    exit 1
-fi
 
 # create a new virtualenv with our debug python build
 ./submodules/cpython/$PYTHON_EXE -m venv venv
