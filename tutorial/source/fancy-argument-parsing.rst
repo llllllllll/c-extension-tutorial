@@ -191,7 +191,7 @@ pipe will be considered optional. If the argument is not provided, the value of
 the reference will remain unchanged. For example, we could add a default value
 of ``b=1`` in our ``add`` function:
 
-.. code-block::
+.. code-block:: c
 
    static PyObject*
    add(PyObject* self, PyObject* args, PyObject* kwargs)
