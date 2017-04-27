@@ -57,7 +57,7 @@ deallocated.
 .. c:function:: void Py_XINCREF(PyObject* ob)
 
    The ``Py_INCREF`` macro increments the :ref:`reference count <ref-count>` of
-   an object if ``ob`` is not ``NULL``.
+   an object if ``ob`` is not :c:data:`NULL`.
 
    :param PyObject* ob: The object to increment the reference count of.
 
@@ -77,7 +77,7 @@ deallocated.
 .. c:function:: void Py_XDECREF(PyObject* ob)
 
    The ``Py_XDECREF`` macro decrements the :ref:`reference count <ref-count>` of
-   an object if ``ob`` is not ``NULL``.
+   an object if ``ob`` is not :c:data:`NULL`.
 
    :param PyObject* ob: The object to decrement the reference count of.
 
@@ -87,13 +87,13 @@ deallocated.
 .. c:function:: void Py_CLEAR(PyObject* ob)
 
    The ``Py_CLEAR`` macro decrements the :ref:`reference count <ref-count>` of
-   an object and then sets the input :c:type:`PyObject*` to ``NULL``.
+   an object and then sets the input :c:type:`PyObject*` to :c:data:`NULL`.
 
    :param PyObject* ob: The object to decrement the reference count of and set
-                        to ``NULL``.
+                        to :c:data:`NULL`.
 
-CPython Structures
-------------------
+CPython Types
+-------------
 
 ``Py_ssize_t``
 ~~~~~~~~~~~~~~
@@ -101,7 +101,7 @@ CPython Structures
 .. c:type:: Py_ssize_t
 
    A ``Py_ssize_`` is a signed integral type used to hold counts and object
-   sizes. On many platforms this is an alias of ``ssize_t``.
+   sizes. On many platforms this is an alias of :c:type:`ssize_t`.
 
 ``PyObject``
 ~~~~~~~~~~~~
@@ -113,13 +113,13 @@ CPython Structures
    ``PyObject`` is the structure which holds Python values. The definition looks
    like:
 
-.. c:member:: Py_ssize_t PyObject.ob_refcnt
+   .. c:member:: Py_ssize_t PyObject.ob_refcnt
 
-   The object's :ref:`reference count <ref-count>`.
+      The object's :ref:`reference count <ref-count>`.
 
-.. c:member:: PyTypeObject* PyObject.ob_type
+   .. c:member:: PyTypeObject* PyObject.ob_type
 
-   The object's type as a Python object.
+      The object's type as a Python object.
 
 .. note::
 
@@ -143,6 +143,1009 @@ A ``PyTypeObject*`` can safely be cast to a :c:type:`PyObject*`.
 :c:type:`PyObject*`\s can be cast to ``PyTypeObject*``\s only after a
 ``PyType_Check``.
 
+Fields
+``````
+
+.. c:member:: const char* PyTypeObject.tp_name
+
+   The fully qualified name to the class as a C string. This string must stay
+   alive forever.
+
+   This field is not inherited.
+
+.. c:member:: Py_ssize_t PyTypeObject.tp_basicsize
+
+   The base size of instances of this class. You should use ``sizeof`` to derive
+   this from the instance struct type.
+
+   This field is inherited
+
+.. c:member:: Py_ssize_t PyTypeObject.tp_itemsize
+
+   Some classes require variable storage to hold instances. For example,
+   :c:type:`PyTupleObject`\s stores all of the members inline. The
+   :c:member:`PyTypeObject.tp_basicsize` of a tuple would be the base object and
+   element count, the :c:member:`PyTypeObject.tp_itemsize` would be
+   ``sizeof(PyObject*)``. If instances are always the same size, this field
+   should be 0.
+
+.. c:member:: destructor PyTypeObject.tp_dealloc
+
+   A pointer to the object destructor. This function is called when the
+   :ref:`reference count <ref-count>` hits 0. This function should release
+   any references that it owns and then defer to
+   :c:member:`PyTypeObject.tp_free` to deallocate the memory.
+
+   This field is inherited.
+
+.. c:member:: printfunc PyTypeObject.tp_print
+
+   Reserved slot from Python 2. This is now unused.
+
+.. c:member:: getattrfunc PyTypeObject.tp_getattr
+
+   Deprecated in favor of :c:member:`PyTypeObject.tp_getattro`
+
+.. c:member:: setattrfunc PyTypeObject.tp_setattr
+
+   Deprecated in favor of :c:member:`PyTypeObject.tp_setattro`
+
+.. c:member:: PyAsyncMethods* PyTypeObject.tp_as_async
+
+   Pointer to additional functions used when an object supports the Async
+   Protocol. If the type does not support the Async Protocol, this can be
+   :c:data:`NULL`.
+
+   The value of the pointer is not inherited, but the members are inherited
+   individually.
+
+.. c:member:: reprfunc PyTypeObject.tp_repr
+
+   C API equivalent of ``__repr__``
+
+   This can be invoked with :c:func:`PyObject_Repr`.
+
+   This field is inherited.
+
+.. c:member:: PyNumberMethods* PyTypeObject.tp_as_number
+
+   Pointer to additional functions used when an object supports the :ref:`number
+   Protocol <number-api>`. If the type does not support the Number Protocol,
+   this can be :c:data:`NULL`.
+
+   The value of the pointer is not inherited, but the members are inherited
+   individually.
+
+   .. c:type:: PyNumberMethods
+
+       A collection of function pointers used to support the :ref:`number-api`.
+
+       .. code-block:: c
+
+          typedef struct {
+              binaryfunc nb_add;
+              binaryfunc nb_subtract;
+              binaryfunc nb_multiply;
+              binaryfunc nb_remainder;
+              binaryfunc nb_divmod;
+              ternaryfunc nb_power;
+              unaryfunc nb_negative;
+              unaryfunc nb_positive;
+              unaryfunc nb_absolute;
+              inquiry nb_bool;
+              unaryfunc nb_invert;
+              binaryfunc nb_lshift;
+              binaryfunc nb_rshift;
+              binaryfunc nb_and;
+              binaryfunc nb_xor;
+              binaryfunc nb_or;
+              unaryfunc nb_int;
+              void *nb_reserved;
+              unaryfunc nb_float;
+
+              binaryfunc nb_inplace_add;
+              binaryfunc nb_inplace_subtract;
+              binaryfunc nb_inplace_multiply;
+              binaryfunc nb_inplace_remainder;
+              ternaryfunc nb_inplace_power;
+              binaryfunc nb_inplace_lshift;
+              binaryfunc nb_inplace_rshift;
+              binaryfunc nb_inplace_and;
+              binaryfunc nb_inplace_xor;
+              binaryfunc nb_inplace_or;
+
+              binaryfunc nb_floor_divide;
+              binaryfunc nb_true_divide;
+              binaryfunc nb_inplace_floor_divide;
+              binaryfunc nb_inplace_true_divide;
+
+              unaryfunc nb_index;
+
+              binaryfunc nb_matrix_multiply;
+              binaryfunc nb_inplace_matrix_multiply;
+        } PyNumberMethods;
+
+
+.. c:member:: PySequenceMethods* PyTypeObject.tp_as_sequence
+
+   Pointer to additional functions used when an object supports the Sequence
+   Protocol. If the type does not support the Sequence Protocol, this can be
+   :c:data:`NULL`.
+
+   The value of the pointer is not inherited, but the members are inherited
+   individually.
+
+   .. c:type:: PySequenceMethods
+
+      A collection of function pointers used to support the Sequence API.
+
+      .. c:member:: lenfunc PySequenceMethods.sq_length
+
+         The function used to support :c:func:`PyObject_Size`. This function
+         will automatically be converted into a Python ``__len__``.
+
+      .. c:member:: binaryfunc PySequenceMethods.sq_concat
+
+         The function used to support :c:func:`PySequence_Concat`. If there is
+         no :c:member:`PyNumberMethods.nb_add` function, this will be turned
+         into a ``__add__`` function (like ``list + list`` in Python).
+
+      .. c:member:: ssizeargfunc PySequenceMethods.sq_repeat
+
+         The function used to support :c:func:`PySequence_Repeat`. If there is
+         no :c:member:`PyNumberMethods.nb_multiply` this will be turned into a
+         ``__mul__`` function (like ``list * int`` in Python).
+
+      .. c:member:: ssizeargfunc PySequenceMethods.sq_item
+
+         The function used to support :c:func:`PySequenceMethods.sq_item`. This
+         function will be converted into a ``__getitem__`` method in Python.
+
+      .. c:member:: ssizeobjargproc PySequenceMethods.sq_ass_item
+
+         The function used to support :c:func:`PySequence_SetItem`. This slot
+         can be :c:data:`NULL` if the object doesn't support assignment (like
+         ``tuple``).  This will be converted into a ``__setitem__`` method in
+         Python.
+
+      .. c:member:: objobjproc PySequenceMethods.sq_contains
+
+         The function used to support :c:func:`PySequence_Contains`. If this is
+         left :c:data:`NULL`, a linear search will be performed. This function
+         will be converted into a ``__contains__`` method in Python.
+
+      .. c:member:: binaryfunc PySequenceMethods.sq_inplace_concat
+
+         The function used to support :c:func:`PySequence_InPlaceConcat`. It
+         should modify ``self`` in place and then return ``self``. This function
+         is like ``list += list`` in Python.
+
+      .. c:member:: binaryfunc PySequenceMethods.sq_inplace_repeat
+
+         The function used to support :c:func:`PySequence_InPlaceRepeat`. It
+         should modify ``self`` in place and then return ``self``. This function
+         is like ``list *= int`` in Python.
+
+.. c:member:: PyMappingMethods* PyTypeObject.tp_as_mapping
+
+   Pointer to additional functions used when an object supports the Mapping
+   Protocol. If the type does not support the Mapping Protocol, this can be
+   :c:data:`NULL`.
+
+   The value of the pointer is not inherited, but the members are inherited
+   individually.
+
+.. c:member:: hashfunc PyTypeObject.tp_hash
+
+   C API equivalent of ``__hash__``.
+
+   This can be set to :c:func:`PyObject_HashNotImplemented` which is the
+   equivalent of adding ``__hash__ = None`` in Python.
+
+   This can be invoked with :c:func:`PyObject_Hash`.
+
+   This field is inherited along with :c:member:`PyTypeObject.tp_richcompare`
+   only when the subtype does not override either function.
+
+.. c:member:: ternaryfunc PyTypeObject.tp_call
+
+   C API equivalent of ``__call__``.
+
+   This field is inherited.
+
+.. c:member:: reprfunc PyTypeObject.tp_str
+
+   The C API equivalent of ``_str__``. If this not set,
+   :c:member:`PyTypeObject.tp_repr` will be used.
+
+   This can be invoked with :c:func:`PyObject_Str`.
+
+   This field is inherited.
+
+.. c:member:: getattrofunc PyTypeObject.tp_getattro
+
+   The C API equivalent of ``__getattr__``. This can be set to
+   :c:func:`PyObject_GenericGetAttr` which implements standard attribute lookup.
+
+   This can be invoked with :c:func:`PyObject_GetAttr`.
+
+   This field is inherited.
+
+   .. note::
+
+      To use :c:func:`PyObject_GenericGetAttr` the
+      :c:member:`PyTypeObject.tp_dictoffset` must be nonzero.
+
+.. c:member:: setattrofunc PyTypeObject.tp_setattrofunc
+
+   The C API equivalent of ``__setattr__``. This can be set to
+   :c:func:`PyObject_GenericSetAttr` which implements standard attribute
+   assignment.
+
+   This can be invoked with :c:func:`PyObject_SetAttr`.
+
+   This field is inherited.
+
+   .. note::
+
+      To use :c:func:`PyObject_GenericSetAttr` the
+      :c:member:`PyTypeObject.tp_dictoffset` must be nonzero.
+
+.. c:member:: PyBufferProcs* PyTypeObject.tp_as_buffer
+
+   Pointer to additional functions used when an object supports the Buffer
+   Protocol. If the type does not support the Buffer Protocol, this can be
+   :c:data:`NULL`.
+
+   The value of the pointer is not inherited, but the members are inherited
+   individually.
+
+.. c:member:: unsigned long PyTypeObject.tp_flags
+
+   A bitmask of information about the type.
+
+   .. c:macro:: Py_TPFLAGS_HEAPTYPE
+
+      This bit is set when the type object is allocated on the heap. This is
+      true for classes defined in Python.
+
+   .. c:macro:: Py_TPFLAGS_BASETYPE
+
+      This bit is set when the type can be subclassed. Sometimes we don't want
+      to treat out members as virtual so we ignore the possibility of subclasses
+      changing methods.
+
+      Attempting to subclass for a type without this bit set will generate an
+      error like:
+
+      .. code-block:: python
+
+         TypeError: type '<name>' is not an acceptable base type
+
+   .. c:macro:: Py_TPFLAGS_READY
+
+      Marks that :c:func:`PyType_Ready` has been called. You should not
+      explicitly set this flag.
+
+   .. c:macro:: Py_TPFLAGS_READYING
+
+      Marks that :c:func:`PyType_Ready` is in the process of readying the
+      type. You should not explicitly set this flag.
+
+   .. c:macro:: Py_TPFLAGS_HAVE_GC
+
+      Marks that this type supports the cyclic garbage collector. If this is
+      set, instances need to be allocated with :c:func:`PyObject_GC_New` and
+      freed with :c:func:`PyObject_GC_Del`. If this bit is set the
+      :c:member:`PyTypeObject.tp_traverse` function must be set.
+
+   .. c:macro:: Py_TPFLAGS_DEFAULT
+
+      The default set of bits that should be set for all new classes.
+
+   .. c:macro:: Py_TPFLAGS_LONG_SUBCLASS
+
+   .. c:macro:: Py_TPFLAGS_LIST_SUBCLASS
+
+   .. c:macro:: Py_TPFLAGS_TUPLE_SUBCLASS
+
+   .. c:macro:: Py_TPFLAGS_BYTES_SUBCLASS
+
+   .. c:macro:: Py_TPFLAGS_UNICODE_SUBCLASS
+
+   .. c:macro:: Py_TPFLAGS_DICT_SUBCLASS
+
+   .. c:macro:: Py_TPFLAGS_BASE_EXC_SUBCLASS
+
+   .. c:macro:: Py_TPFLAGS_TYPE_SUBCLASS
+
+      Marks that the type is a subclass of one of the builtin types. These
+      dramatically speed up common ``Py*_Check`` calls which can then use a bit
+      and instead of a generic :c:func:`PyObject_Isinstance` call. You should
+      not set these bits directly, :c:func:`PyType_Ready` will do this if
+      needed.
+
+   .. c:macro:: Py_TPFLAGS_HAVE_FINALIZE
+
+      Marks that the :c:member:`PyTypeObject.tp_finalize` should be called on
+      object destruction.
+
+.. c:member:: const char* PyTypeObject.tp_doc
+
+   A pointer to the docstring as a C string. If :c:data:`NULL`, ``__doc__`` will
+   be ``None``.
+
+   This field is not inherited.
+
+.. c:member:: traverseproc PyTypeObject.tp_traverse
+
+   A pointer to the cyclical garbage collector traversal function. This is only
+   called if :c:macro:`Py_TPFLAGS_HAVE_GC` is set.
+
+   This function needs to call :c:func:`Py_VISIT` on all of the members which
+   may participate in a cycle.
+
+   To use the :c:func:`Py_VISIT` macro the :c:type:`visitproc` argument *must*
+   be called ``visit`` and the :c:type:`void*` argument must be called ``arg``.
+
+   Below we have a type with two :c:type:`PyObject*` fields and one non-object
+   field.
+
+   .. code-block:: c
+
+      typedef struct {
+          PyObject mt_base;
+          PyObject* mt_object_member;
+          PyObject* mt_other_object_member;
+          Py_ssize_t mt_not_an_object;
+      } mytype;
+
+      static int
+      mytype_traverse(mytype* self, visitproc visit, void* arg)
+      {
+          Py_VISIT(self->mt_base);
+          Py_VISIT(self->mt_object_member);
+          /* note: not visiting self->mt_not_an_object because it is not a
+             PyObject* */
+          return 0;
+      }
+
+   .. note::
+
+      It is safe to not traverse immutable scalar members, for example:
+      :c:type:`PyLongObject*` members. It doesn't hurt to visit all
+      :c:type:`PyObject*` members so if you aren't sure, just visit it!
+
+.. c:member:: inquiry PyTypeObject.tp_clear
+
+   Clear any references owned by this object **while keeping the object in a
+   valid state**. Valid state means that the interpreter should not segfault
+   because an object assumes members are non-null and then ``tp_clear`` sets
+   them to :c:data:`NULL`. An example of this idea is :c:meth:`list.clear`. This
+   drops all of the references owned by the list; however, at the end you still
+   have a valid list. This function is only called if
+   :c:macro:`Py_TPFLAGS_HAVE_GC` is set.
+
+   When clearing references the :c:func:`Py_CLEAR` macro should be used instead
+   of just :c:func:`Py_DECREF`. This is because decref can trigger a
+   deallocation which can invoke arbitrary Python code through an object's
+   ``__del__`` method. This code can reference back to the object being cleared
+   and we don't want to return a pointer to the recently destroyed object.
+
+   Below we have a type with two :c:type:`PyObject*` fields and one non-object
+   field.
+
+   .. code-block:: c
+
+      typedef struct {
+          PyObject mt_base;
+          PyObject* mt_object_member;
+          PyObject* mt_other_object_member;
+          Py_ssize_t mt_not_an_object;
+      } mytype;
+
+      static int
+      mytype_clear(mytype* self)
+      {
+          Py_CLEAR(self->mt_base);
+          Py_CLEAR(self->mt_object_member);
+          /* note: not clearing self->mt_not_an_object because it is not a
+             PyObject* */
+          return 0;
+      }
+
+   .. note::
+
+      Immutable objects can skip defining a :c:member:`PyTypeObject.tp_clear`
+      field. It is impossible to form a reference cycle with all immutable
+      objects which means the other object's :c:member:`PyTypeObject.tp_clear`
+      functions must be sufficient to clear the cycle.
+
+.. c:member:: richcmpfunc PyTypeObject.tp_richcompare
+
+   The function which supports :c:func:`PyObject_Richcompare` for this type.
+
+   See :c:func:`PyObject_Richcompare` for more information about how this
+   function works.
+
+   This field is inherited along with :c:member:`PyTypeObject.tp_hash` only when
+   the subtype does not override either function.
+
+.. c:member:: Py_ssize_t PyTypeObject.tp_weaklistoffset
+
+   The offset into an object structure where the weaklist is stored. This is
+   used for making objects weakly referenceable. If an object is not weakly
+   referenceable, this field should be set to 0. This offset needs to point to a
+   :c:data:`NULL` initialized :c:type:`PyObject*` slot in the instance
+   structure.
+
+   In Python, if a class defines a ``__weakref__`` slot in ``__slots__``, that
+   offset will be used as the :c:member:`PyTypeObject.tp_weaklistoffset`.
+
+   Below we have a weakly referenceable type:
+
+   .. code-block:: c
+
+      typedef struct {
+          PyObject wr_base;
+          PyObject* wr_weaklist;
+          /* other data if we want */
+      } mytype;
+
+      PyTypeObject mytype_type = {
+          /* ... */
+
+          offsetof(mytype, wr_weaklist),  /* tp_weaklistoffset */
+
+          /* ... */
+      };
+
+   Note that we use the ``ofsetoff`` operator to compute the offset accounting
+   for the size of all members before ``wr_weaklist`` and any padding added by
+   the compiler.
+
+   This field is inherited.
+
+   .. note::
+
+      Do not confuse this field with :c:member:`PyTypeObject.tp_weaklist` which
+      is the weaklist storage for taking weak references of the type object
+      itself.
+
+.. c:member:: getiterfunc PyTypeObject.tp_iter
+
+   The C API equivalent of ``__iter__``.
+
+   This can be invoked with :c:func:`PyObject_Iter`.
+
+   This field is inherited.
+
+   .. note::
+
+      Objects may still be iterable without this function set if the support the
+      Sequence Protocol. The :c:func:`PySequenceMethods.sq_item` function will
+      be used from 0 until an :c:data:`PyExc_IndexError` is raised just like in
+      Python with ``__getitem__``.
+
+.. c:member:: iternextfunc PyTypeObject.tp_iternext
+
+   The C API equivalent of ``__next__``. The core difference is that
+   :c:data:`PyExc_StopIteration` does *not* need to be set when the iterator is
+   exhausted. This will be done before returning to Python but the exception
+   overhead can be avoided when being called from C.
+
+   If this slot is set, :c:member:`PyTypeObject.tp_iter` should be a function
+   which returns a :ref:`new reference <new-reference>` to ``self``.
+
+   This can be invoked with :c:func:`PyIter_Next`.
+
+.. c:member:: PyMethodDef* PyTypeObject.tp_methods
+
+   A :c:data:`NULL` terminated array of :c:type:`PyMethodDef` structures which
+   will become the methods of the class. For each :c:type:`PyMethodDef` in this
+   list, a function object will be created and stored in the
+   :c:member:`PyTypeObject.tp_dict`.
+
+   The value of this field is not inherited but the methods will be.
+
+.. c:member:: PyMemberDef* PyTypeObject.tp_members
+
+   A :c:data:`NULL` terminated array of :c:type:`PyMemberDef` structures which
+   will become the methods of the class. For each :c:type:`PyMemberDef` in this
+   list, a descriptor object will be created and stored in the
+   :c:member:`PyTypeObject.tp_dict`.
+
+   The value of this field is not inherited but the members will be.
+
+   .. c:type:: PyMemberDef
+
+      A structure which defines a descriptor for exposing a C member as a Python
+      member.
+
+      .. c:member:: char* PyMemberDef.name
+
+         The name of the member as a C string.
+
+      .. c:member:: int PyMemberDef.type
+
+         The type code of the member.
+
+         .. c:macro:: T_SHORT
+
+            A :c:type:`short` member to be converted into a Python ``int``.
+
+         .. c:macro:: T_INT
+
+            A :c:type:`int` member to be converted into a Python ``int``.
+
+         .. c:macro:: T_LONG
+
+            A :c:type:`long` member to be converted into a Python ``int``.
+
+         .. c:macro:: T_FLOAT
+
+            A :c:type:`float` member to be converted into a Python ``float``.
+
+         .. c:macro:: T_DOUBLE
+
+            A :c:type:`double` member to be converted into a Python ``float``.
+
+         .. c:macro:: T_STRING
+
+            A :c:type:`char*` member to be converted into a Python ``str``.
+
+            .. note::
+
+               This implies :c:macro:`READONLY`.
+
+         .. c:macro:: T_OBJECT
+
+            Get a :c:type:`PyObject*`. If the pointer is :c:data:`NULL`,
+            ``None`` will be returned.
+
+            :c:macro:`T_OBJECT_EX` is often a better choice because of how it
+            handles ``del``.
+
+         .. c:macro:: T_OBJECT_EX
+
+            Get a :c:type:`PyObject*`. If the pointer is :c:data:`NULL`,
+            a :c:data:`PyExc_AttributeError` will be raised.
+
+         .. c:macro:: T_CHAR
+
+            A :c:type:`char` member to be converted into a Python ``str`` of
+            length 1.
+
+         .. c:macro:: T_BYTE
+
+            A :c:type:`char` member to be converted into a Python ``int``.
+
+         .. c:macro:: T_UBYTE
+
+            A :c:type:`unsigned char` member to be converted into a Python
+            ``int``.
+
+         .. c:macro:: T_UINT
+
+            A :c:type:`unsigned int` member to be converted into a Python
+            ``int``.
+
+         .. c:macro:: T_USHORT
+
+            A :c:type:`unsigned short` member to be converted into a Python
+            ``int``.
+
+         .. c:macro:: T_ULONG
+
+            A :c:type:`unsigned short` member to be converted into a Python
+            ``int``.
+
+         .. c:macro:: T_BOOL
+
+            A :c:type:`char` member to be converted into a Python ``bool``.
+
+         .. c:macro:: T_LONGLONG
+
+            A :c:type:`long long` member to be converted into a Python ``int``.
+
+         .. c:macro:: T_ULONGLONG
+
+            A :c:type:`unsigned long long` member to be converted into a Python
+            ``int``.
+
+         .. c:macro:: T_PYSSIZET
+
+            A :c:type:`Py_ssize_t` member to be converted into a Python ``int``.
+
+      .. c:member:: Py_ssize_t PyMemberDef.offset
+
+         The offset into the C structure where this member appears. You should
+         always compute this offset with the ``offsetof`` operator.
+
+      .. c:member:: int PyMemberDef.flags
+
+         Flag bits for indicating read or write status. The options are ``0``
+         for read and write access or :c:macro:`READONLY` for read only access.
+
+         :c:macro:`T_STRING` forces :c:macro:`READONLY`.
+
+         Only :c:macro:`T_OBJECT` and :c:macro:`T_OBJECT_EX` can be deleted with
+         ``del`` which sets the pointer to :c:data:`NULL`.
+
+      .. c:member:: char* PyMemberDef.doc
+
+         The docstring for the member. If set to :c:data:`NULL` ``__doc__`` will
+         be ``None``.
+
+.. c:member:: PyGetSetDef* PyTypeObject.tp_getset
+
+   A :c:data:`NULL` terminated array of :c:type:`PyGetSetDef` structures which
+   will become the methods of the class. For each :c:type:`PyGetSetDef` in this
+   list, a descriptor object will be created and stored in the
+   :c:member:`PyTypeObject.tp_dict`..
+
+   .. c:type:: PyGetSetDef
+
+      A :c:type:`PyGetSetDef` defines a computed attribute like a Python
+      :class:`property`
+
+      .. c:member:: char* name
+
+         The name of this attribute as a C string.
+
+      .. c:member:: getter get
+
+         The function used to compute this attribute.
+
+      .. c:member:: setter set
+
+         The function used to assign to this attribute. If the attribute is
+         readonly, this may be :c:data:`NULL`.
+
+      .. c:member:: char* doc
+
+         The docstring as C string. If this is :c:data:`NULL`, ``__doc__`` will
+         be ``None``.
+
+      .. c:member:: void* closure
+
+         Extra data to be passed to the getter and setter functions.
+
+      .. c:type:: getter
+
+         .. code-block:: c
+
+            typedef PyObject* (*getter)(PyObject* self, void* closure);
+
+      .. c:type:: setter
+
+         .. code-block:: c
+
+            typedef int (*setter)(PyObject* self,
+                                  PyObject* value,
+                                  void* closure);
+
+.. c:member:: PyTypeObject* PyTypeObject.tp_base
+
+   The base class for this new type. If set to :c:data:`NULL`,
+   ``&PyBaseObject_Type`` (which is ``object`` in Python) is used.
+
+   This field is not inherited.
+
+.. c:member:: PyObject* PyTypeObject.tp_dict
+
+   The type's dictionary (``__dict__``). This is initialized by
+   :c:func:`PyType_Ready`.
+
+   This field is not inherited but the members of the dictionary are.
+
+   .. note::
+
+      Types sometimes use what is called a "split keys dictionary" instead of a
+      normal Python dict. You should not use the ``PyDict_*`` functions to
+      modify this object.
+
+.. c:member:: descrgetfunc PyTypeObject.tp_descr_get
+
+   The C API equivalent of ``__get__`` for the descriptor protocol.
+
+   This field is inherited.
+
+   .. c:type:: descrgetfunc
+
+      .. code-block:: c
+
+         typedef PyObject* (*descrgetfunc)(PyObject* self,
+                                           PyObject* instance,
+                                           PyObject* owner);
+
+.. c:member:: descrsetfunc PyTypeObject.tp_descr_set
+
+   The C API equivalent of ``__set__`` and ``__delete__`` for the descriptor
+   protocol.
+
+   This field is inherited.
+
+   .. c:type:: descrsetfunc
+
+      .. code-block:: c
+
+         typedef PyObject* (*descrsetfunc)(PyObject* self,
+                                           PyObject* instance,
+                                           PyObject* value);
+
+   If ``value`` is :c:data:`NULL`, this should delete the value.
+
+.. c:member:: Py_ssize_t PyTypeObject.tp_dictoffset
+
+   The offset into an object structure where the ``__dict__`` is stored. This is
+   used for allowing objects to have arbitrary attributes like a normal Python
+   object.
+
+   For some objects, we only want to support a specific set of fields stored in
+   the instance struct so we can set :c:member:`PyTypeObject.tp_dictoffset`
+   to 0 which indicates that we do not have a ``__dict__``.
+
+   The instance structure must have a :c:data:`NULL` initialized
+   :c:type:`PyObject*` member at the offset if it is nonzero.
+
+   Below we have a type with a ``__dict__``:
+
+   .. code-block:: c
+
+      typedef struct {
+          PyObject wd_base;
+          PyObject* wd_dict;
+          /* other data if we want */
+      } mytype;
+
+      PyTypeObject mytype_type = {
+          /* ... */
+
+          offsetof(mytype, wd_dict),  /* tp_dictoffset */
+
+          /* ... */
+      };
+
+   Note that we use the ``ofsetoff`` operator to compute the offset
+   accounting for the size of all members before ``wd_dict`` and any padding
+   added by the compiler.
+
+   This field is inherited.
+
+   .. warning::
+
+      It is not common to define a new class in C that uses a nonzero
+      :c:member:`PyTypeObject.tp_dictoffset`. You are going to lose a lot of
+      potential performance gains by dispatching through a dictionary for all
+      lookups.
+
+.. c:member:: initproc PyTypeObject.tp_init
+
+   The C API equivalent of ``__init__``. This is only used for mutable types.
+
+   This field is inherited.
+
+.. c:member:: allocfunc PyTypeObject.tp_alloc
+
+   A function used to allocate memory for the new instance. This is different
+   from ``__new__`` in that it does not initialize any member data. It exists
+   only as a way to separate object allocation and initialization.
+
+   The :c:type:`Py_ssize_t` argument is the number of items in this
+   instance. This is only meaningful for types with nonzero
+   :c:member:`PyTypeObject.tp_itemsize`.
+
+   All :c:macro:`Py_TPFLAGS_HEAPTYPE` objects use :c:func:`PyType_GenericAlloc`
+   to force standard heap allocations. This is the default and recommended value
+   for all types.
+
+   This field is inherited by static (C defined) subtypes but not heap (Python
+   defined) subtypes.
+
+.. c:member:: newfunc PyTypeObject.tp_new
+
+   A function used to allocate and initialize new instances of the type.
+
+   :c:member:`PyTypeObject.tp_new` should use :c:member:`PyTypeObject.tp_alloc`
+   to allocate the raw memory for the new instance.
+
+   If the type is immutable, the rest of the initialization should happen in the
+   :c:member:`PyTypeObject.tp_new`. If the type is mutable, the initialization
+   should happen in the :c:member:`PyTypeObject.tp_init` which will be called
+   automatically.
+
+   This field is inherited.
+
+.. c:member:: destructor PyTypeObject.tp_free
+
+   A function used to deallocate the memory allocated with
+   :c:member:`PyTypeObject.tp_alloc`.
+
+   By default this is a function that is compatible with the
+   :c:func:`PyType_GenericAlloc` allocator.
+
+   This field is inherited by static (C defined) subtypes but not heap (Python
+   defined) subtypes.
+
+.. c:member:: inquiry PyTypeObject.tp_is_gc
+
+   This function is used when a type has a mix of statically and dynamically
+   allocated instances. In this case, the :c:macro:`Py_TPFLAGS_HAVE_GC` flag is
+   not enough to know if an instance can be collected. In this case, the
+   function should be implemented to return True if the instance can be
+   collected, otherwise False.
+
+   This field is inherited.
+
+   .. note::
+
+      This is a very uncommon function to implement. It is mainly used to
+      support static and dynamic class objects in CPython itself.
+
+.. c:member:: PyObject* PyTypeObject.tp_bases
+
+   A tuple of the base types. This field is set by :c:func:`PyType_Ready` and
+   should not be manually modified.
+
+   This field is not inherited.
+
+.. c:member:: PyObject* PyTypeObject.tp_mro
+
+   A tuple of the full method resolution order. This field is set by
+   :c:func:`PyType_Ready` and should not be manually modified.
+
+   This field is not inherited.
+
+.. c:member:: destructor PyTypeObject.tp_finalize
+
+   A function called before the garbage collector clears references or
+   deallocates the object. This function is only called if
+   :c:macro:`Py_TPFLAGS_HAVE_FINALIZE` is set.
+
+   This can be useful for releasing C level resources like file descriptors.
+
+   See :pep:`442` for more information about this field.
+
+   This field is inherited.
+
+.. c:member:: PyObject* PyTypeObject.tp_cache
+
+   Internal use only.
+
+.. c:member:: PyObject* PyTypeObject.tp_subclasses.
+
+   Internal use only.
+
+.. c:member:: PyObject* PyTypeObject.tp_weaklist
+
+   The member to hold the weaklist for weak references to the type object
+   itself.
+
+   .. note::
+
+      Do not confuse this field with :c:member:`PyTypeObject.tp_weaklistoffset`
+      which is the offset into the instance object where weak references to the
+      instance will be stored.
+
+Support Types
+`````````````
+
+.. c:type:: destructor
+
+   .. code-block:: c
+
+      typedef void (*destructor)(PyObject*);
+
+.. c:type:: getattrfunc
+
+   .. code-block:: c
+
+      typedef PyObject* (*getattrfunc)(PyObject* self, char* attr_name);
+
+.. c:type:: setattrfunc
+
+   .. code-block:: c
+
+      typedef PyObject* (*setattrfunc)(PyObject* self, char* attr_name, PyObject* value);
+
+.. c:type:: reprfunc::
+
+   .. code-block:: c
+
+      typedef PyObject* (*reprfunc)(PyObject*);
+
+.. c:type:: inquiry
+
+   .. code-block:: c
+
+      typedef int (*inquiry)(PyObject*);
+
+.. c:type:: newfunc
+
+   .. code-block:: c
+
+      typedef PyObject* (*newfunc)(PyObject* self, PyObject* args, PyObject* kwargs);
+
+.. c:type:: allocfunc
+
+   .. code-block:: c
+
+      typedef PyObject* (*allocfunc)(PyTypeObject* cls, Py_ssize_t nitems);
+
+.. c:type:: initproc
+
+   .. code-block:: c
+
+      typedef int (*initproc)(PyObject* self, PyObject* args, PyObject* kwargs);
+
+.. c:type:: unaryfunc
+
+   .. code-block:: c
+
+      typedef PyObject* (*unaryfunc)(PyObject*);
+
+.. c:type:: binaryfunc
+
+   .. code-block:: c
+
+      typedef PyObject* (*binaryfunc)(PyObject*, PyObject*);
+
+.. c:type:: ternaryfunc
+
+   .. code-block:: c
+
+      typedef PyObject* (*ternaryfunc)(PyObject*, PyObject*, PyObject*);
+
+.. c:type:: lenfunc
+
+   .. code-block:: c
+
+      typedef Py_ssize_t (*lenfunc)(PyObject*);
+
+.. c:type:: ssizeargfunc
+
+   .. code-block:: c
+
+      typedef PyObject* (*ssizeargfunc)(PyObject*, Py_ssize_t);
+
+.. c:type:: ssizeobjargproc
+
+   .. code-block:: c
+
+      typedef int (*ssizeobjargproc)(PyObject* Py_ssize_t, PyObject*);
+
+.. c:type:: objobjproc
+
+   .. code-block:: c
+
+      typedef int (*objobjproc)(PyObject*, PyObject*);
+
+.. c:type:: hashfunc
+
+   .. code-block:: c
+
+      typedef Py_hash_t (*hashfunc)(PyObject*);
+
+.. c:type:: getattrofunc
+
+   .. code-block:: c
+
+      typedef PyObject* (*getattrofunc)(PyObject*, PyObject*);
+
+
+.. c:type:: setattrofunc
+
+   .. code-block:: c
+
+      typedef PyObject* (*getattrofunc)(PyObject*, PyObject*, PyObject*);
+
+.. c:type:: richcmpfunc
+
+   .. code-block:: c
+
+      typedef PyObject* (*richcmpfunc)(PyObject* lhs, PyObject* rhs, int op);
+
 
 ``PyLongObject``
 ~~~~~~~~~~~~~~~~
@@ -151,9 +1154,9 @@ A ``PyTypeObject*`` can safely be cast to a :c:type:`PyObject*`.
 
    https://docs.python.org/3/c-api/long.html
 
-   ``PyLongObject`` is the structure which holds Python ``int`` objects. This is
-   called a ``PyLongObject`` as a hold over from when arbitrary width integer
-   was called a ``long`` object in Python 2.
+   ``PyLongObject`` is the structure which holds Python :c:type:`int`
+   objects. This is called a ``PyLongObject`` as a hold over from when arbitrary
+   width integer was called a :c:type:`long` object in Python 2.
 
 Casting Rules
 `````````````
@@ -174,18 +1177,24 @@ A ``PyLongObject*`` can safely be cast to a :c:type:`PyObject*`.
    Structure used to describe a method of an extension type. This structure has
    four fields.
 
-.. c:member:: char* PyMethodDef.ml_name
+   .. c:member:: char* PyMethodDef.ml_name
 
-   The name of the method as a C string.
+      The name of the method as a C string.
 
-.. c:member:: PyCFunction PyMethodDef.ml_meth
+   .. c:member:: PyCFunction PyMethodDef.ml_meth
 
-   A pointer to the C implmenetation of the method.
+      A pointer to the C implmenetation of the method.
 
-.. c:member:: int PyMethodDef.ml_flags
+   .. c:member:: int PyMethodDef.ml_flags
 
-   Flag bits indicating how to call :c:member:`~PyMethodDef.ml_meth` should be
-   called or bound to a class.
+      Flag bits indicating how to call :c:member:`~PyMethodDef.ml_meth` should
+      be called or bound to a class.
+
+   .. c:member:: char* PyMethodDef.ml_doc
+
+      The contents of the method's docstring as a C string. If this is
+      :c:data:`NULL`, the docstring will be ``None`` in Python. This should be
+      created with :c:func:`PyDoc_STRVAR`.
 
 .. c:macro:: METH_VARARGS
 
@@ -209,7 +1218,7 @@ A ``PyLongObject*`` can safely be cast to a :c:type:`PyObject*`.
    they are listed with the ``METH_NOARGS`` flag. They need to be of type
    :c:type:`PyCFunction`. The first parameter is typically named ``self`` and
    will hold a reference to the module or object instance. In all cases the
-   second parameter will be ``NULL``.
+   second parameter will be :c:data:`NULL`.
 
 .. c:macro:: METH_O
 
@@ -226,7 +1235,7 @@ A ``PyLongObject*`` can safely be cast to a :c:type:`PyObject*`.
 .. c:macro:: METH_STATIC
 
    Indicates that this method should be bound as a ``staticmethod`` instead of
-   an instance method. The first argument will always be ``NULL``.
+   an instance method. The first argument will always be :c:data:`NULL`.
 
 .. c:macro:: METH_COEXIST
 
@@ -240,12 +1249,6 @@ A ``PyLongObject*`` can safely be cast to a :c:type:`PyObject*`.
       This flag is not used often and can be ignored when writing most
       extensions.
 
-.. c:member:: char* PyMethodDef.ml_doc
-
-   The contents of the method's docstring as a C string. If this is ``NULL``,
-   the docstring will be ``None`` in Python. This should be created with
-   :c:func:`PyDoc_STRVAR`.
-
 ``PyCFunction``
 ~~~~~~~~~~~~~~~
 
@@ -253,9 +1256,10 @@ A ``PyLongObject*`` can safely be cast to a :c:type:`PyObject*`.
 
    Type of the functions used to implement most Python callables in C. Functions
    of this type take two :c:type:`PyObject*` parameters and return one such
-   value. If the return value is ``NULL``, an exception shall have been set. If
-   not ``NULL``, the return value is interpreted as the return value of the
-   function as exposed in Python. The function must return a new reference.
+   value. If the return value is :c:data:`NULL`, an exception shall have been
+   set. If not :c:data:`NULL`, the return value is interpreted as the return
+   value of the function as exposed in Python. The function must return a new
+   reference.
 
 ``PyModuleDef``
 ~~~~~~~~~~~~~~~
@@ -264,48 +1268,50 @@ A ``PyLongObject*`` can safely be cast to a :c:type:`PyObject*`.
 
    A specification of a Python module object.
 
-.. c:member:: PyModuleDef_Base PyModuleDef.m_base
+   .. c:member:: PyModuleDef_Base PyModuleDef.m_base
 
-   The part of the module definition managed by CPython. Always initialize this
-   with ``PyModuleDef_HEAD_INIT``.
+      The part of the module definition managed by CPython. Always initialize
+      this with ``PyModuleDef_HEAD_INIT``.
 
-.. c:member:: char* PyModuleDef.m_name
+   .. c:member:: char* PyModuleDef.m_name
 
-   The name of the module as a C string.
+      The name of the module as a C string.
 
-.. c:member:: char* PyModuleDef.m_doc
+   .. c:member:: char* PyModuleDef.m_doc
 
-   The docstring of the module as a C string. If set to ``NULL`` this will be
-   ``None`` in Python This should be created with :c:func:`PyDoc_STRVAR`.
+      The docstring of the module as a C string. If set to :c:data:`NULL` this
+      will be ``None`` in Python This should be created with
+      :c:func:`PyDoc_STRVAR`.
 
-.. c:member:: Py_ssize_t PyModuleDef.m_size
+   .. c:member:: Py_ssize_t PyModuleDef.m_size
 
-   The size of the module's global state. If set to -1 this will not allocate
-   any space for global state.
+      The size of the module's global state. If set to -1 this will not allocate
+      any space for global state.
 
-.. c:member:: PyMethodDef* PyModuleDef.m_methods
+   .. c:member:: PyMethodDef* PyModuleDef.m_methods
 
-   A ``NULL`` terminated array of methods to put in this module.
+      A :c:data:`NULL` terminated array of methods to put in this module.
 
-.. c:member:: PyModuleDef_Slot* PyModuleDef.m_slots
+   .. c:member:: PyModuleDef_Slot* PyModuleDef.m_slots
 
-   A ``NULL`` terminated array of slots for using multi-phase
-   initialization. This is not used in this tutorial and can be set to ``NULL``.
+      A :c:data:`NULL` terminated array of slots for using multi-phase
+      initialization. This is not used in this tutorial and can be set to
+      :c:data:`NULL`.
 
-.. c:member:: traverseproc PyModuleDef.m_traverse
+   .. c:member:: traverseproc PyModuleDef.m_traverse
 
-   The function used for traversing the global state allocated with
-   :c:member:`~PyModuleDef.m_size`. This can be ``NULL`` if not needed.
+      The function used for traversing the global state allocated with
+      :c:member:`~PyModuleDef.m_size`. This can be :c:data:`NULL` if not needed.
 
-.. c:member:: inquiry PyModuleDef.m_clear
+   .. c:member:: inquiry PyModuleDef.m_clear
 
-   The function used for clearing the global state allocated with
-   :c:member:`~PyModuleDef.m_size`. This can be ``NULL`` if not needed.
+      The function used for clearing the global state allocated with
+      :c:member:`~PyModuleDef.m_size`. This can be :c:data:`NULL` if not needed.
 
-.. c:member:: freefunc PyModuleDef.m_free
+   .. c:member:: freefunc PyModuleDef.m_free
 
-   The function used for freeing the global state allocated with
-   :c:member:`~PyModuleDef.m_size`. This can be ``NULL`` if not needed.
+      The function used for freeing the global state allocated with
+      :c:member:`~PyModuleDef.m_size`. This can be :c:data:`NULL` if not needed.
 
 ``PyMODINIT_FUNC``
 ~~~~~~~~~~~~~~~~~~
@@ -313,9 +1319,9 @@ A ``PyLongObject*`` can safely be cast to a :c:type:`PyObject*`.
 .. c:macro:: PyMODINIT_FUNC
 
    The type of the module initialization function. This function should return a
-   new module object or ``NULL`` if the file cannot be imported. The function
-   needs to be named: ``PyInit_{name}`` where ``name`` is the name of the
-   module.
+   new module object or :c:data:`NULL` if the file cannot be imported. The
+   function needs to be named: ``PyInit_{name}`` where ``name`` is the name of
+   the module.
 
 Global Sentinels
 ----------------
@@ -405,17 +1411,17 @@ CPython Functions and Macros
 .. c:function:: unsigned long PyLong_AsUnsignedLong(PyObject* ob)
 
    Convert a ``PyObject*`` of type :c:type:`PyLongObject*` to an ``unsigned
-   long``. If ``ob`` is not a ``long`` object, an exception is raised.
+   long``. If ``ob`` is not a :c:type:`long` object, an exception is raised.
 
    :param PyObject* ob: The object to convert.
-   :return: ``ob`` as an ``unsigned long``.
+   :return: ``ob`` as an :c:type:`unsigned long`.
 
 ``PyLong_FromUnsignedLong``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. c:function:: PyObject* PyLong_FromUnsignedLong(unsigned long l)
 
-   Convert an ``unsigned long`` into a :c:type:`PyObject*`. If the object cannot
+   Convert an :c:type:`unsigned long` into a :c:type:`PyObject*`. If the object cannot
    be allocated an exception is raised.
 
    :param l: The unsigned long to convert to a pyobjectptr.
@@ -451,7 +1457,7 @@ CPython Functions and Macros
 
    :param PyObject* ob: The object to lookup the attribute on.
    :param PyObject* attr_name: The name of the attribute to lookup.
-   :return: The attribute name ``attr_name`` on ``ob`` or ``NULL`` with an
+   :return: The attribute name ``attr_name`` on ``ob`` or :c:data:`NULL` with an
             exception set if the attribute doesn't exist.
 
 
@@ -558,11 +1564,11 @@ CPython Functions and Macros
    :param PyObject* args: The argument tuple passed to the
                           :c:type:`PyCFunction`.
    :param PyObject* kwargs: The keyword argument dictionary passed to the
-                            :c:type:`PyCFunction`. This *can* be ``NULL``.
+                            :c:type:`PyCFunction`. This *can* be :c:data:`NULL`.
    :param const char* format: The format string. see :ref:`format characters
                               <arg-format>` for more information.
    :param char** keywords: The names of the keyword arguments that this function
-                           accepts as a ``NULL`` terminated array.
+                           accepts as a :c:data:`NULL` terminated array.
    :param ...: Variadic values based on ``format``.
    :return: True with an exception set if an error occurred, otherwise False.
 
@@ -573,8 +1579,8 @@ Example
 The following example defines a function called ``function_name`` which accepts
 three arguments:
 
-- ``a``: A Python ``str`` object to be converted into a ``char*``.
-- ``b``: A Python ``int`` object to be converted into an ``int``.
+- ``a``: A Python ``str`` object to be converted into a :c:type:`char*`.
+- ``b``: A Python :c:type:`int` object to be converted into an :c:type:`int`.
 - ``c``: An optional arbitrary Python object.
 
 .. code-block:: c
@@ -618,57 +1624,57 @@ https://docs.python.org/3/c-api/arg.html#strings-and-buffers for a full list.
 ``s`` (str) [const char*]
 '''''''''''''''''''''''''
 
-Accept a ``str`` argument as a ``char*``. A reference to a ``char*`` should
-appear in the variadic argument list at this index.
+Accept a ``str`` argument as a :c:type:`char*`. A reference to a :c:type:`char*`
+should appear in the variadic argument list at this index.
 
 ``z`` (str) [const char*]
 '''''''''''''''''''''''''
 
-Accept a ``str`` argument as a ``char*``. A reference to a ``char*`` should
-appear in the variadic argument list at this index. This argument can also be
-``None`` in which case the pointer will be ``NULL``.
+Accept a ``str`` argument as a :c:type:`char*`. A reference to a :c:type:`char*`
+should appear in the variadic argument list at this index. This argument can
+also be ``None`` in which case the pointer will be :c:data:`NULL`.
 
 ``b`` (int) [unsigned char]
 '''''''''''''''''''''''''''
 
-Accept an ``int`` argument as an ``unsigned char``. A reference to an ``unsigned
-char`` should appear in the variadic argument list at this index.
+Accept an :c:type:`int` argument as an :c:type:`unsigned char`. A reference to
+an ``unsigned char`` should appear in the variadic argument list at this index.
 
 ``h`` (int) [short]
 '''''''''''''''''''
 
-Accept an ``int`` argument as a ``short``. A reference to a ``short`` should
-appear in the variadic argument list at this index.
+Accept an :c:type:`int` argument as a :c:type:`short`. A reference to a
+:c:type:`short` should appear in the variadic argument list at this index.
 
 ``i`` (int) [int]
 '''''''''''''''''
 
-Accept an ``int`` argument as an ``int``. A reference to an ``int`` should
-appear in the variadic argument list at this index.
+Accept an :c:type:`int` argument as an :c:type:`int`. A reference to an
+:c:type:`int` should appear in the variadic argument list at this index.
 
 ``i`` (int) [long]
 ''''''''''''''''''
 
-Accept an ``int`` argument as a ``long``. A reference to a ``long`` should
-appear in the variadic argument list at this index.
+Accept an :c:type:`int` argument as a :c:type:`long`. A reference to a
+:c:type:`long` should appear in the variadic argument list at this index.
 
 ``C`` (str of length 1) [int]
 '''''''''''''''''''''''''''''
 
-Accept a ``str`` of length 1 argument as an ``int``. A reference to an ``int``
-should appear in the variadic argument list at this index.
+Accept a ``str`` of length 1 argument as an :c:type:`int`. A reference to an
+:c:type:`int` should appear in the variadic argument list at this index.
 
 ``f`` (float) [float]
 '''''''''''''''''''''
 
-Accept a ``float`` argument as a ``float``. A reference to a ``float`` should
-appear in the variadic argument list at this index.
+Accept a ``float`` argument as a :c:type:`float`. A reference to a
+:c:type:`float` should appear in the variadic argument list at this index.
 
 ``d`` (float) [double]
 ''''''''''''''''''''''
 
-Accept a ``float`` argument as a ``double``. A reference to a ``double`` should
-appear in the variadic argument list at this index.
+Accept a ``float`` argument as a :c:type:`double`. A reference to a
+:c:type:`double` should appear in the variadic argument list at this index.
 
 ``O`` (object) [:c:type:`PyObject*`\]
 '''''''''''''''''''''''''''''''''''''
@@ -692,8 +1698,8 @@ format requires two values in the variadic argument list:
 ''''''''''''''''''
 
 Accept any argument and check the truthiness of the value. A reference to an
-``int`` should appear in the variadic argument list at this index. This is like
-accepting an object as ``O`` and then using :c:func:`PyObject_IsTrue`.
+:c:type:`int` should appear in the variadic argument list at this index. This is
+like accepting an object as ``O`` and then using :c:func:`PyObject_IsTrue`.
 
 .. warning::
 
@@ -741,32 +1747,32 @@ reference <new-reference>` to ``a`` which the caller owns.
 
 .. c:function:: PyObject* PyNumber_Add(PyObject* a, PyObject* b)
 
-   :return: A new reference to ``a + b`` or ``NULL`` with an exception set.
+   :return: A new reference to ``a + b`` or :c:data:`NULL` with an exception set.
 
 .. c:function:: PyObject* PyNumber_Subtract(PyObject* a, PyObject* b)
 
-   :return: A new reference to ``a - b`` or ``NULL`` with an exception set.
+   :return: A new reference to ``a - b`` or :c:data:`NULL` with an exception set.
 
 .. c:function:: PyObject* PyNumber_Subtract(PyObject* a, PyObject* b)
 
-   :return: A new reference to ``a * b`` or ``NULL`` with an exception set.
+   :return: A new reference to ``a * b`` or :c:data:`NULL` with an exception set.
 
 .. c:function:: PyObject* PyNumber_FloorDivide(PyObject* a, PyObject* b)
 
-   :return: A new reference to ``a // b`` or ``NULL`` with an exception set.
+   :return: A new reference to ``a // b`` or :c:data:`NULL` with an exception set.
 
 .. c:function:: PyObject* PyNumber_TrueDivide(PyObject* a, PyObject* b)
 
-   :return: A new reference to ``a / b`` or ``NULL`` with an exception set.
+   :return: A new reference to ``a / b`` or :c:data:`NULL` with an exception set.
 
 .. c:function:: PyObject* PyNumber_Remainder(PyObject* a, PyObject* b)
 
-   :return: A new reference to ``a % b`` or ``NULL`` with an exception set.
+   :return: A new reference to ``a % b`` or :c:data:`NULL` with an exception set.
 
 .. c:function:: PyObject* PyNumber_Divmod(PyObject* a, PyObject* b)
 
-   :return: A new reference to ``divmod(a, b)`` or ``NULL`` with an exception
-            set.
+   :return: A new reference to ``divmod(a, b)`` or :c:data:`NULL` with an
+            exception set.
 
 .. c:function:: PyObject* PyNumber_Power(PyObject* a, PyObject* b, PyObject* c)
 
@@ -775,32 +1781,35 @@ reference <new-reference>` to ``a`` which the caller owns.
    :param PyObject* c: Number to take the exponent modulo. If provided, this
                        function is like ``(a ** b) % c``. To ignore this value
                        pass :c:data:`Py_None`.
-   :return: A new reference to ``pow(a, b, c)`` or ``NULL`` with an exception
-            set.
+   :return: A new reference to ``pow(a, b, c)`` or :c:data:`NULL` with an
+            exception set.
 
 .. c:function:: PyObject* PyNumber_Negative(PyObject* a)
 
-   :return: A new reference to ``-a`` or ``NULL`` with an exception set.
+   :return: A new reference to ``-a`` or :c:data:`NULL` with an exception set.
 
 .. c:function:: PyObject* PyNumber_Positive(PyObject* a)
 
-   :return: A new reference to ``+a`` or ``NULL`` with an exception set.
+   :return: A new reference to ``+a`` or :c:data:`NULL` with an exception set.
 
 .. c:function:: PyObject* PyNumber_Absolute(PyObject* a)
 
-   :return: A new reference to ``abs(a)`` or ``NULL`` with an exception set.
+   :return: A new reference to ``abs(a)`` or :c:data:`NULL` with an exception
+            set.
 
 .. c:function:: PyObject* PyNumber_Invert(PyObject* a)
 
-   :return: A new reference to ``~a`` or ``NULL`` with an exception set.
+   :return: A new reference to ``~a`` or :c:data:`NULL` with an exception set.
 
 .. c:function:: PyObject* PyNumber_Lshift(PyObject* a, PyObject* b)
 
-   :return: A new reference to ``a << b`` or ``NULL`` with an exception set.
+   :return: A new reference to ``a << b`` or :c:data:`NULL` with an exception
+            set.
 
 .. c:function:: PyObject* PyNumber_Rshift(PyObject* a, PyObject* b)
 
-   :return: A new reference to ``a >> b`` or ``NULL`` with an exception set.
+   :return: A new reference to ``a >> b`` or :c:data:`NULL` with an exception
+            set.
 
 .. c:function:: PyObject* PyNumber_And(PyObject* a, PyObject* b)
 
@@ -808,11 +1817,13 @@ reference <new-reference>` to ``a`` which the caller owns.
 
       This is bitwise ``and``, not boolean ``and``.
 
-   :return: A new reference to ``a & b`` or ``NULL`` with an exception set.
+   :return: A new reference to ``a & b`` or :c:data:`NULL` with an exception
+            set.
 
 .. c:function:: PyObject* PyNumber_Xor(PyObject* a, PyObject* b)
 
-   :return: A new reference to ``a ^ b`` or ``NULL`` with an exception set.
+   :return: A new reference to ``a ^ b`` or :c:data:`NULL` with an exception
+            set.
 
 .. c:function:: PyObject* PyNumber_Or(PyObject* a, PyObject* b)
 
@@ -820,7 +1831,8 @@ reference <new-reference>` to ``a`` which the caller owns.
 
       This is bitwise ``or``, not boolean ``or``.
 
-   :return: A new reference to ``a | b`` or ``NULL`` with an exception set.
+   :return: A new reference to ``a | b`` or :c:data:`NULL` with an exception
+            set.
 
 Error Handling
 --------------
@@ -844,7 +1856,7 @@ Error Handling
    :param PyObject* type: The exception type to raise.
    :param const char* format: The exception format string.
    :param ...: The values to format into ``format``.
-   :return: Always ``NULL``.
+   :return: Always :c:data:`NULL`.
 
 .. c:function:: PyObject* PyErr_NoMemory()
 
@@ -852,14 +1864,14 @@ Error Handling
 
    Raise an exception that indicates that memory could not be allocated.
 
-   :return: Always ``NULL``.
+   :return: Always :c:data:`NULL`.
 
 .. c:function:: PyObject* PyErr_Occurred()
 
    https://docs.python.org/3.6/c-api/exceptions.html#c.PyErr_Occurred
 
    Return a :ref:`borrowed reference <borrowed-reference>` to the type of the
-   currently raised exception. If no exception is raised, return ``NULL``.
+   currently raised exception. If no exception is raised, return :c:data:`NULL`.
 
    This should just be used to check if an exception is raised, do not compare
    this value to exception types. To compare exceptions to an exception type

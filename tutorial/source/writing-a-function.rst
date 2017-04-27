@@ -26,7 +26,7 @@ Let's begin with a simple C function to compute Fibonacci numbers:
    }
 
 Now that we have a a C function we need to provide a way to convert our
-:c:type:`PyObject*`\s to and from C ``unsigned long`` objects to invoke this
+:c:type:`PyObject*`\s to and from C :c:type:`unsigned long` objects to invoke this
 from Python.
 
 .. note::
@@ -38,19 +38,20 @@ from Python.
 :c:type:`PyLongObject*`
 -----------------------
 
-Python ``int`` objects are concretely typed as a ``PyLongObject``.
+Python :c:type:`int` objects are concretely typed as a :c:type:`PyLongObject`.
 
 .. note::
 
-   Python ``int`` objects are called ``PyLongObject`` in the C API as a holdover
-   from when ``int`` and ``long`` were different in Python 2. In Python 3:
-   ``int`` is arbitrarily sized like the old Python 2 ``long``.
+   Python :c:type:`int` objects are called :c:type:`PyLongObject` in the C API
+   as a holdover from when :c:type:`int` and :c:type:`long` were different in
+   Python 2. In Python 3: :c:type:`int` is arbitrarily sized like the old Python
+   2 :c:type:`long`.
 
 Adapting Long Objects
 ---------------------
 
 For many primitive C types, CPython provides functions to convert to and from
-Python objects. For ``unsigned long``, we can use
+Python objects. For :c:type:`unsigned long`, we can use
 :c:func:`PyLong_FromUnsignedLong` and :c:func:`PyLong_AsUnsignedLong` to convert
 to and from C unsigned long objects.
 
@@ -73,7 +74,7 @@ is the input we want to receive from the Python caller.
 .. note::
 
    Right now we are ignoring the fact that ``n`` might not actually be a
-   ``PyLongObject*``. We will get to error handling later.
+   :ctype:`PyLongObject*`. We will get to error handling later.
 
 Creating a Python Callable Object
 ---------------------------------
@@ -103,10 +104,10 @@ A :c:type:`PyMethodDef` for our ``pyfib`` function looks like:
 :c:func:`PyDoc_STRVAR`
 ~~~~~~~~~~~~~~~~~~~~~~
 
-We don't just use a normal ``const char*`` for the docstring because CPython can
-be compiled to not include docstrings. This is useful on platforms with less
-available RAM. To properly respect this compile time option we wrap all
-docstrings in the :c:func:`PyDoc_STRVAR` macro.
+We don't just use a normal :c:type:`const char*` for the docstring because
+CPython can be compiled to not include docstrings. This is useful on platforms
+with less available RAM. To properly respect this compile time option we wrap
+all docstrings in the :c:func:`PyDoc_STRVAR` macro.
 
 :c:macro:`METH_O`
 ~~~~~~~~~~~~~~~~~
@@ -155,13 +156,13 @@ disabled at compile time.
 The ``-1`` is the size of the module's global state. For our simple ``fib``
 module we don't have any state so this can be set to ``-1``.
 
-Next is a ``NULL`` terminated array of methods to put at module scope in this
-module. We have created an array with just our ``pyfib`` function, but we could
-include more than one function if we needed to.
+Next is a :c:data:`NULL` terminated array of methods to put at module scope in
+this module. We have created an array with just our ``pyfib`` function, but we
+could include more than one function if we needed to.
 
 Finally we have a bunch of function pointers for managing the module's global
 state. When we don't have any state (the size if ``-1``), we can set these all
-to ``NULL``.
+to :c:data:`NULL`.
 
 Making The Shared Object Importable
 -----------------------------------

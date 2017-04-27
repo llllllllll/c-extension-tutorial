@@ -4,8 +4,8 @@ Function Exercises
 Add Error Handling
 ------------------
 
-Add error handling in ``fib`` to properly return ``NULL`` with an exception set
-if ``n`` is not an integer.
+Add error handling in ``fib`` to properly return :c:data:`NULL` with an
+exception set if ``n`` is not an integer.
 
 Using the Abstract Number API
 -----------------------------

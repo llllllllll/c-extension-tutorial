@@ -12,8 +12,9 @@ As a first pass, we could replace the :c:macro:`METH_O` in our
 
 1. :c:type:`PyObject*` ``self``: The module or instance.
 2. :c:type:`PyObject*` ``args``: A tuple of positional arguments.
-3. :c:type:`PyObject*` ``kwargs``: A dictionary of keyword arguments or ``NULL``
-   if no keyword arguments are provided. The dict can also be empty.
+3. :c:type:`PyObject*` ``kwargs``: A dictionary of keyword arguments or
+   :c:data:`NULL` if no keyword arguments are provided. The dict can also be
+   empty.
 
 This is like defining a Python function like:
 
@@ -89,9 +90,10 @@ more standardized error messages when users provide values of unexpected types.
 
 For example, we can write a simple integer add function using
 :c:func:`PyArg_ParseTupleAndKeywords` by using the ``i`` format character. This
-format character looks for a Python ``int`` object as an input and will convert
-to a C ``int`` for us. Instead of passing the address of a :c:func:`PyObject*`
-to hold the result, we pass the address of a C ``int``. For example:
+format character looks for a Python :c:type:`int` object as an input and will
+convert to a C :c:type:`int` for us. Instead of passing the address of a
+:c:func:`PyObject*` to hold the result, we pass the address of a C
+:c:type:`int`. For example:
 
 .. code-block:: c
 
@@ -214,8 +216,8 @@ of ``b=1`` in our ``add`` function:
    }
 
 When ``b`` is not provided either positionally or by keyword, the value of
-``&b`` will remain unchanged after ``PyArg_ParseTupleAndKeywords`` so it will
-have a default value of 1.
+``&b`` will remain unchanged after :c:fun:`PyArg_ParseTupleAndKeywords` so it
+will have a default value of 1.
 
 We can still explicitly pass ``b`` to change this: for example:
 

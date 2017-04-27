@@ -124,8 +124,8 @@ Think back to our definition of ``pyfib`` in C. We started with:
        /* ... */
    }
 
-What happens if ``n`` is not actually an ``int`` object? Try ``fib('a')`` or
-another non-int object.
+What happens if ``n`` is not actually an :c:type:`int` object? Try ``fib('a')``
+or another non-int object.
 
 If ``C-c`` doesn't kill the session, you might need to use ``C-z`` and then ``$
 kill %1``.
@@ -135,6 +135,6 @@ Why Did this Hang?
 
 When ``n`` is not an integer object, :c:func:`PyLong_AsUnsignedLong` raises an
 exception and returns ``(unsigned long) -1`` which is
-``MAX_UNSIGNED_LONG``. We ignore the error and enter the Fibonacci function's
-loop which tries computing the ``18446744073709551615``\th Fibonacci number
-which will take a very long time.
+:c:macro:`UNSIGNED_LONG_MAX`. We ignore the error and enter the Fibonacci
+function's loop which tries computing the ``18446744073709551615``\th Fibonacci
+number which will take a very long time.
