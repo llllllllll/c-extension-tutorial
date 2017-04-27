@@ -11,9 +11,8 @@
         ./configure --with-pydebug
     elif [ `uname` == "Darwin" ];then
         PYTHON_EXE=python.exe
-        ALT_PREFIX=/usr/local/Cellar/openssl/1.0.2k
-        CPPFLAGS="-I$(brew --prefix openssl)/include -I$ALT_PREFIX/include" \
-                LDLAGS="-L$(brew --prefix openssl)/lib -L$ALT_PREFIX/lib" \
+        CPPFLAGS="-I$(brew --prefix openssl)/include" \
+                LDFLAGS="-L$(brew --prefix openssl)/lib" \
                 ./configure --with-pydebug
     else
         echo "Only GNU+Linux and OSX are supported"
