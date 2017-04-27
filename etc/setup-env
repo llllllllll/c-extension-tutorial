@@ -1,37 +1,41 @@
 #!/bin/bash
 
-set -e
+(
+    set -e
 
-# build a debug version of CPython
-pushd submodules/cpython
+    # build a debug version of CPython
+    pushd submodules/cpython
 
-if [ `uname` == "Linux" ];then
-    PYTHON_EXE=python
-    ./configure --with-pydebug
-elif [ `uname` == "Darwin" ];then
-    PYTHON_EXE=python.exe
-    CPPFLAGS="-I$(brew --prefix openssl)/include" \
-            LDLAGS="-L$(brew --prefix openssl)/lib" \
-            ./configure --with-pydebug
-else
-    echo "Only GNU+Linux and OSX are supported"
-    exit 1
-fi
+    if [ `uname` == "Linux" ];then
+        PYTHON_EXE=python
+        ./configure --with-pydebug
+    elif [ `uname` == "Darwin" ];then
+        PYTHON_EXE=python.exe
+        CPPFLAGS="-I$(brew --prefix openssl)/include" \
+                LDLAGS="-L$(brew --prefix openssl)/lib" \
+                ./configure --with-pydebug
+    else
+        echo "Only GNU+Linux and OSX are supported"
+        exit 1
+    fi
 
-make -j4
-popd
+    make -j4
+    popd
 
-# create a new virtualenv with our debug python build
-./submodules/cpython/$PYTHON_EXE -m venv venv
+    # create a new virtualenv with our debug python build
+    ./submodules/cpython/$PYTHON_EXE -m venv venv
 
-# add the python gdb debug script next to python binary in the venv
-cp submodules/cpython/Tools/gdb/libpython.py venv/bin/python-gdb.py
+    # add the python gdb debug script next to python binary in the venv
+    cp submodules/cpython/Tools/gdb/libpython.py venv/bin/python-gdb.py
+
+    source venv/bin/activate
+    pip install ipython
+    pip install sphinx
+    pip install sphinx-rtd-theme
+
+    pushd tutorial
+    make html
+    popd
+)
 
 source venv/bin/activate
-pip install ipython
-pip install sphinx
-pip install sphinx-rtd-theme
-
-pushd tutorial
-make html
-popd
