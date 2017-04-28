@@ -216,7 +216,7 @@ of ``b=1`` in our ``add`` function:
    }
 
 When ``b`` is not provided either positionally or by keyword, the value of
-``&b`` will remain unchanged after :c:fun:`PyArg_ParseTupleAndKeywords` so it
+``&b`` will remain unchanged after :c:func:`PyArg_ParseTupleAndKeywords` so it
 will have a default value of 1.
 
 We can still explicitly pass ``b`` to change this: for example:

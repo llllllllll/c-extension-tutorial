@@ -74,7 +74,7 @@ is the input we want to receive from the Python caller.
 .. note::
 
    Right now we are ignoring the fact that ``n`` might not actually be a
-   :ctype:`PyLongObject*`. We will get to error handling later.
+   :c:type:`PyLongObject*`. We will get to error handling later.
 
 Creating a Python Callable Object
 ---------------------------------

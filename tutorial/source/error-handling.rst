@@ -24,7 +24,7 @@ an API function, you need to explicitly check for this error return value and
 return a value that indicates that your function has failed as well.
 
 :c:data:`NULL` :c:type:`PyObject*`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the CPython API, a :c:data:`NULL` value is never valid for a
 :c:type:`PyObject*` so it is used to signal that an error has occurred. For

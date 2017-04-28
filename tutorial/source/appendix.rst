@@ -537,7 +537,7 @@ Fields
    Clear any references owned by this object **while keeping the object in a
    valid state**. Valid state means that the interpreter should not segfault
    because an object assumes members are non-null and then ``tp_clear`` sets
-   them to :c:data:`NULL`. An example of this idea is :c:meth:`list.clear`. This
+   them to :c:data:`NULL`. An example of this idea is :meth:`list.clear`. This
    drops all of the references owned by the list; however, at the end you still
    have a valid list. This function is only called if
    :c:macro:`Py_TPFLAGS_HAVE_GC` is set.
