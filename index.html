@@ -161,6 +161,52 @@
             
   <div class="section" id="how-to-write-and-debug-c-extension-modules">
 <h1>How to Write and Debug C Extension Modules<a class="headerlink" href="#how-to-write-and-debug-c-extension-modules" title="Permalink to this headline">¶</a></h1>
+<p>The CPython interpreter allows us implement modules in C for performance
+critical code or to interface with external libraries while presenting users
+with a high level Python API. This tutorial will teach you how to leverage the
+power of C in your Python projects.</p>
+<p>We will start by explaining the C representation of Python objects and how to
+manipulate them from within C. We will then move on to implementing functions in
+C for use in Python. We will discuss reference counting and correct exception
+handling. We will also talk about how to package and build your new extension
+module so that it may be shared on PyPI. (We will only be covering building
+extension modules on GNU/Linux and OSX, not Windows).</p>
+<p>After the break, we will show how to implement a new type in C. This will cover
+how to hook into various protocols and properly support cyclic garbage
+collection. We will also discuss techniques for debugging C extension modules
+with gdb using the CPython gdb extension.</p>
+<div class="section" id="install-steps">
+<h2>Install Steps<a class="headerlink" href="#install-steps" title="Permalink to this headline">¶</a></h2>
+<p>Prior to the tutorial, attendees need to install a git, a C89 compatible C
+compiler and gdb. OSX users will also need to install <code class="docutils literal"><span class="pre">brew</span></code>.</p>
+<p>For the C compiler: I recommend gcc, but clang works as well.
+The tutorial will be using gdb specific features so gdb is reqiured. Other C
+debuggers like lldb will not work.</p>
+<p>Once all of the system packages have been installed, run the following commands
+in a terminal:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ git clone --recursive https://github.com/llllllllll/c-extension-tutorial.git
+$ <span class="nb">cd</span> c-extension-tutorial
+$ <span class="nb">source</span> etc/setup-env
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">setup-env</span></code> script will compile a debug version of CPython 3.6 and create
+a local virtual env with this new interpreter. This ensures that everyone is
+using the same version of CPython with the same compile time flags.</p>
+</div>
+<div class="section" id="viewing-the-tutorial">
+<h2>Viewing the Tutorial<a class="headerlink" href="#viewing-the-tutorial" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The tutorial content is not complete! The install instructions above are
+valid but the content is not complete yet so don&#8217;t read ahead!</p>
+</div>
+<p>The tutorial is structured as a sphinx project. This allows the tutorial to be
+viewed from a standard browser or hosted online.</p>
+<p>The material can be viewed in a browser by opening
+<code class="docutils literal"><span class="pre">tutorial/build/html/index.html</span></code>, for example:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ <span class="si">${</span><span class="nv">BROWSER</span><span class="si">}</span> tutorial/build/html/index.html
+</pre></div>
+</div>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
@@ -228,6 +274,7 @@
 </ul>
 </li>
 </ul>
+</div>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
