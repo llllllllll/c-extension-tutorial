@@ -1,5 +1,4 @@
-How to Write and Debug C Extension Modules
-==========================================
+.. include:: ../../README.rst
 
 .. toctree::
    :maxdepth: 2
