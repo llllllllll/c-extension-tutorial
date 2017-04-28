@@ -1,0 +1,284 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>C Level Representation of Python Structures &mdash; c-extension-tutorial  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="c-extension-tutorial  documentation" href="index.html"/>
+        <link rel="next" title="Writing a New Function in C" href="writing-a-function.html"/>
+        <link rel="prev" title="What is an Extension Module?" href="what-is-an-extension-module.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> c-extension-tutorial
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="what-is-an-extension-module.html">What is an Extension Module?</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">C Level Representation of Python Structures</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#object-lifetime">Object Lifetime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#concrete-types">Concrete Types</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-function.html">Writing a New Function in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-and-importing.html">Building and Importing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error-handling.html">Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="abstract-api.html">Abstract Object API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fancy-argument-parsing.html">Fancy Argument Parsing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-class.html">Writing a New Class in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">c-extension-tutorial</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>C Level Representation of Python Structures</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/c-level-representation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="c-level-representation-of-python-structures">
+<h1>C Level Representation of Python Structures<a class="headerlink" href="#c-level-representation-of-python-structures" title="Permalink to this headline">¶</a></h1>
+<p>In the C API, Python objects are represented by a <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a>. A
+<a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> is a reference to an object which is managed by the CPython
+interpreter.</p>
+<p>The <code class="docutils literal"><span class="pre">PyObject</span></code> struct is defined as:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+     <span class="n">Py_ssize_t</span> <span class="n">ob_refcnt</span><span class="p">;</span>   <span class="cm">/* object reference count */</span>
+     <span class="n">PyTypeObject</span><span class="o">*</span> <span class="n">ob_type</span><span class="p">;</span>  <span class="cm">/* object type */</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The <a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_type" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">ob_type</span></code></a> field is a pointer to the Python type for the
+object. This is how objects communicate their runtime type. For example: if a
+given <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> points to a unicode object, then the
+<a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_type" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">ob_type</span></code></a> field will be set to <code class="docutils literal"><span class="pre">&amp;PyUnicode_Type</span></code> where
+<code class="docutils literal"><span class="pre">PyUnicode_Type</span></code> is the Python <code class="docutils literal"><span class="pre">unicode</span></code> type. This should be accessed
+through <a class="reference internal" href="appendix.html#c.Py_TYPE" title="Py_TYPE"><code class="xref c c-func docutils literal"><span class="pre">Py_TYPE()</span></code></a>.</p>
+<p>the <a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_refcnt" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">ob_refcnt</span></code></a> is the <a class="reference internal" href="appendix.html#ref-count"><span class="std std-ref">reference count</span></a> of
+the object. This is the number of places where this object is being used. This
+should be accessed through <a class="reference internal" href="appendix.html#c.Py_REFCNT" title="Py_REFCNT"><code class="xref c c-func docutils literal"><span class="pre">Py_REFCNT()</span></code></a>.</p>
+<div class="section" id="object-lifetime">
+<h2>Object Lifetime<a class="headerlink" href="#object-lifetime" title="Permalink to this headline">¶</a></h2>
+<p>CPython uses a reference counting garbage collection strategy. When an object is
+created, its reference count starts at one, which is the reference owned by the
+creator. The reference count can be increased with <a class="reference internal" href="appendix.html#c.Py_INCREF" title="Py_INCREF"><code class="xref c c-func docutils literal"><span class="pre">Py_INCREF()</span></code></a> or
+decreased with <a class="reference internal" href="appendix.html#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal"><span class="pre">Py_DECREF()</span></code></a>. As soon as the reference count reaches zero,
+the object is no longer needed and it will be deallocated.</p>
+</div>
+<div class="section" id="concrete-types">
+<h2>Concrete Types<a class="headerlink" href="#concrete-types" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> is an abstract reference that can point to any type;
+however, we eventually need to actually store information on an object. Subtypes
+of <code class="docutils literal"><span class="pre">object</span></code> are represented by <code class="docutils literal"><span class="pre">struct</span></code>s whose first member is a
+<code class="docutils literal"><span class="pre">PyObject</span></code> followed by any instance data needed.</p>
+<p>In C, a pointer to a <code class="docutils literal"><span class="pre">struct</span></code> is equivalent to a pointer to its first member,
+this makes it safe to cast from a type defined this way to and from
+<code class="docutils literal"><span class="pre">PyObject*</span></code>.</p>
+<p>Users rarely need to use the more specialized type when working with the CPython
+API because most APIs expect and return plain <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> values.</p>
+<p>One case where users often work with a concrete type is <a class="reference internal" href="appendix.html#c.PyTypeObject" title="PyTypeObject"><code class="xref c c-type docutils literal"><span class="pre">PyTypeObject*</span></code></a>
+which is the result of <a class="reference internal" href="appendix.html#c.Py_TYPE" title="Py_TYPE"><code class="xref c c-func docutils literal"><span class="pre">Py_TYPE()</span></code></a>.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="writing-a-function.html" class="btn btn-neutral float-right" title="Writing a New Function in C" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="what-is-an-extension-module.html" class="btn btn-neutral" title="What is an Extension Module?" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Joe Jevnik.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

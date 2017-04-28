@@ -1,0 +1,355 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Abstract Object API &mdash; c-extension-tutorial  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="c-extension-tutorial  documentation" href="index.html"/>
+        <link rel="next" title="Fancy Argument Parsing" href="fancy-argument-parsing.html"/>
+        <link rel="prev" title="Error Handling" href="error-handling.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> c-extension-tutorial
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="what-is-an-extension-module.html">What is an Extension Module?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="c-level-representation.html">C Level Representation of Python Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-function.html">Writing a New Function in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-and-importing.html">Building and Importing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error-handling.html">Error Handling</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Abstract Object API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#generic-object-functions">Generic Object Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#comparison">Comparison</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#number-protocol">Number Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-number-api-in-fib">Using the Number API in <code class="docutils literal"><span class="pre">fib</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#extra-work">Extra Work</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fancy-argument-parsing.html">Fancy Argument Parsing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-class.html">Writing a New Class in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">c-extension-tutorial</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Abstract Object API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/abstract-api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="abstract-object-api">
+<h1>Abstract Object API<a class="headerlink" href="#abstract-object-api" title="Permalink to this headline">¶</a></h1>
+<p>So far we have talked about how to coerce Python objects to and from <code class="docutils literal"><span class="pre">unsigned</span>
+<span class="pre">long</span></code> objects; however, one of the benefits of Python is that it is a dynamic
+language. Being dynamic means we can program to an object&#8217;s interface and write
+code that accepts any object that matches that interface. This pattern is often
+called &#8220;duck typing&#8221;.</p>
+<p>The C API also allows us to write code that is generic in this way by using the
+Abstract Object API. The Abstract Object API is broken up into a couple parts
+based on common Python protocols, for example, the mapping protocol or the
+iterator protocol. Some functions can act on any type, for example:
+<a class="reference internal" href="appendix.html#c.PyObject_Repr" title="PyObject_Repr"><code class="xref c c-func docutils literal"><span class="pre">PyObject_Repr()</span></code></a></p>
+<p>There are performance trade offs to consider when using the Abstract Object
+API. The Abstract Object API requires a lot of runtime dispatching and object
+allocations so it will often be slower than the equivalent code using a more
+specific object&#8217;s API; but, it allows us to write functions which behave more
+like normal Python functions.</p>
+<div class="section" id="generic-object-functions">
+<h2>Generic Object Functions<a class="headerlink" href="#generic-object-functions" title="Permalink to this headline">¶</a></h2>
+<p>Most of the builtin Python functions have an Abstract Object API
+equivalent. Generally the name is the same except it is PyObject_ClassCase
+instead of alllowercase.</p>
+<ul class="simple">
+<li><a class="reference internal" href="appendix.html#c.PyObject_GetAttr" title="PyObject_GetAttr"><code class="xref c c-func docutils literal"><span class="pre">PyObject_GetAttr()</span></code></a></li>
+<li><a class="reference internal" href="appendix.html#c.PyObject_SetAttr" title="PyObject_SetAttr"><code class="xref c c-func docutils literal"><span class="pre">PyObject_SetAttr()</span></code></a></li>
+<li><a class="reference internal" href="appendix.html#c.PyObject_Repr" title="PyObject_Repr"><code class="xref c c-func docutils literal"><span class="pre">PyObject_Repr()</span></code></a></li>
+</ul>
+<div class="section" id="comparison">
+<h3>Comparison<a class="headerlink" href="#comparison" title="Permalink to this headline">¶</a></h3>
+<p>A weird quirk of the CPython API is that all of the comparison operators (<code class="docutils literal"><span class="pre">&gt;</span></code>,
+<code class="docutils literal"><span class="pre">&gt;=</span></code>, <code class="docutils literal"><span class="pre">==</span></code>, etc...) are grouped into a single function called
+<a class="reference external" href="https://docs.python.org/3/c-api/object.html#c.PyObject_RichCompare" title="(in Python v3.6)"><code class="xref c c-func docutils literal"><span class="pre">PyObject_RichCompare()</span></code></a> instead of different functions like in
+Python. This is probably done to save space in the <a class="reference internal" href="appendix.html#c.PyTypeObject" title="PyTypeObject"><code class="xref c c-type docutils literal"><span class="pre">PyTypeObject</span></code></a>
+struct.</p>
+<p>This function accepts the two operands followed by a macro which specifies the
+operator to use. For example, to call <code class="docutils literal"><span class="pre">a</span> <span class="pre">&lt;</span> <span class="pre">b</span></code> in the CPython API you would
+write:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">PyObject</span><span class="o">*</span> <span class="n">a</span><span class="p">;</span>  <span class="cm">/* ... */</span>
+<span class="n">PyObject</span><span class="o">*</span> <span class="n">b</span><span class="p">;</span>  <span class="cm">/* ... */</span>
+
+<span class="n">PyObject</span><span class="o">*</span> <span class="n">result</span> <span class="o">=</span> <span class="n">PyObject_RichCompare</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">py_LE</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">result</span><span class="p">)</span> <span class="p">{</span>
+    <span class="cm">/* error handling */</span>
+    <span class="n">Py_DECREF</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="cm">/* do stuff with ``result`` */</span>
+<span class="n">Py_DECREF</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><a class="reference external" href="https://docs.python.org/3/c-api/object.html#c.PyObject_RichCompare" title="(in Python v3.6)"><code class="xref c c-func docutils literal"><span class="pre">PyObject_RichCompare()</span></code></a> can invoke arbitrary Python code so we need to
+check for errors. This will also raise an error if <code class="docutils literal"><span class="pre">a</span></code> and <code class="docutils literal"><span class="pre">b</span></code> cannot be
+compared because they are incompatible types.</p>
+<p>Because it is common to want the result of a comparison as a boolean value,
+there is a helper function called <a class="reference internal" href="appendix.html#c.PyObject_RichCompareBool" title="PyObject_RichCompareBool"><code class="xref c c-func docutils literal"><span class="pre">PyObject_RichCompareBool()</span></code></a> which
+returns a C <code class="xref c c-type docutils literal"><span class="pre">int</span></code> instead of a <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a>. This saves us the
+hassle of worrying about cleaning up the reference to <code class="docutils literal"><span class="pre">result</span></code>. We could
+rewrite the above example with <a class="reference internal" href="appendix.html#c.PyObject_RichCompareBool" title="PyObject_RichCompareBool"><code class="xref c c-func docutils literal"><span class="pre">PyObject_RichCompareBool()</span></code></a> as:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">PyObject</span><span class="o">*</span> <span class="n">a</span><span class="p">;</span>  <span class="cm">/* ... */</span>
+<span class="n">PyObject</span><span class="o">*</span> <span class="n">b</span><span class="p">;</span>  <span class="cm">/* ... */</span>
+
+<span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="n">PyObject_RichCompareBool</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">py_LE</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">result</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="cm">/* error handling */</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The function can still raise an exception, so we need to check for values less
+than 0 which signals that an error occurred.</p>
+</div>
+</div>
+<div class="section" id="number-protocol">
+<h2>Number Protocol<a class="headerlink" href="#number-protocol" title="Permalink to this headline">¶</a></h2>
+<p>Unlike comparisons, there are different functions for all of the numeric
+operators. These are mostly named <code class="docutils literal"><span class="pre">PyNumber_{Operator}</span></code>, for example:</p>
+<ul class="simple">
+<li><a class="reference internal" href="appendix.html#c.PyNumber_Add" title="PyNumber_Add"><code class="xref c c-func docutils literal"><span class="pre">PyNumber_Add()</span></code></a></li>
+<li><a class="reference internal" href="appendix.html#c.PyNumber_Subtract" title="PyNumber_Subtract"><code class="xref c c-func docutils literal"><span class="pre">PyNumber_Subtract()</span></code></a></li>
+<li><a class="reference external" href="https://docs.python.org/3/c-api/number.html#c.PyNumber_Multiply" title="(in Python v3.6)"><code class="xref c c-func docutils literal"><span class="pre">PyNumber_Multiply()</span></code></a></li>
+</ul>
+<p>and so on.</p>
+<p>Like the rest of the Abstract Object API, these functions are generic on their
+input and return new <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a>s.</p>
+<p>For a more complete list of Number API functions, see <a class="reference internal" href="appendix.html#number-api"><span class="std std-ref">Number API</span></a>.</p>
+</div>
+<div class="section" id="using-the-number-api-in-fib">
+<h2>Using the Number API in <code class="docutils literal"><span class="pre">fib</span></code><a class="headerlink" href="#using-the-number-api-in-fib" title="Permalink to this headline">¶</a></h2>
+<p>One nice thing about Python <code class="xref c c-type docutils literal"><span class="pre">int</span></code> objects is that they can hold
+arbitrarily large integers. This is not true for <code class="xref c c-type docutils literal"><span class="pre">unsigned</span> <span class="pre">long</span></code> values
+which can store at most <code class="docutils literal"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">64</span> <span class="pre">-</span> <span class="pre">1</span></code>. The Fibonacci sequence grows quickly
+and we will run out of room to store the results if we represent it as an
+<code class="xref c c-type docutils literal"><span class="pre">unsigned</span> <span class="pre">long</span></code>.</p>
+<p>Open up <code class="docutils literal"><span class="pre">fib.c</span></code> and change it so that we store <code class="docutils literal"><span class="pre">a</span></code> and <code class="docutils literal"><span class="pre">b</span></code> in
+<a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> values. Use the Number API functions to do arithmetic. We
+can continue to hold <code class="docutils literal"><span class="pre">n</span></code> in an <code class="xref c c-type docutils literal"><span class="pre">unsigned</span> <span class="pre">long</span></code> because that is a
+reasonable limit for the number of Fibonacci numbers we can compute.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Remember to check for errors!</p>
+</div>
+<div class="section" id="extra-work">
+<h3>Extra Work<a class="headerlink" href="#extra-work" title="Permalink to this headline">¶</a></h3>
+<p>If you complete the exercise early, try to optimize <code class="docutils literal"><span class="pre">fib</span></code> by only using the
+boxed integer values when we know <code class="docutils literal"><span class="pre">fib(n)</span></code> will overflow.</p>
+<p>This technique of having a typed fast path for common inputs with a generic
+fallback path dramatically speed up extensions.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="fancy-argument-parsing.html" class="btn btn-neutral float-right" title="Fancy Argument Parsing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="error-handling.html" class="btn btn-neutral" title="Error Handling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Joe Jevnik.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

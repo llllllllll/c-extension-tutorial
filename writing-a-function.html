@@ -1,0 +1,411 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Writing a New Function in C &mdash; c-extension-tutorial  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="c-extension-tutorial  documentation" href="index.html"/>
+        <link rel="next" title="Building and Importing" href="building-and-importing.html"/>
+        <link rel="prev" title="C Level Representation of Python Structures" href="c-level-representation.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> c-extension-tutorial
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="what-is-an-extension-module.html">What is an Extension Module?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="c-level-representation.html">C Level Representation of Python Structures</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Writing a New Function in C</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pylongobject"><code class="docutils literal"><span class="pre">PyLongObject*</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adapting-long-objects">Adapting Long Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-a-python-callable-object">Creating a Python Callable Object</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pydoc-strvar"><code class="docutils literal"><span class="pre">PyDoc_STRVAR()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#meth-o"><code class="docutils literal"><span class="pre">METH_O</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-python-module">Creating a Python Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#making-the-shared-object-importable">Making The Shared Object Importable</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="building-and-importing.html">Building and Importing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error-handling.html">Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="abstract-api.html">Abstract Object API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fancy-argument-parsing.html">Fancy Argument Parsing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-class.html">Writing a New Class in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">c-extension-tutorial</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Writing a New Function in C</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/writing-a-function.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="writing-a-new-function-in-c">
+<h1>Writing a New Function in C<a class="headerlink" href="#writing-a-new-function-in-c" title="Permalink to this headline">¶</a></h1>
+<p>Let&#8217;s begin with a simple C function to compute Fibonacci numbers:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="kt">unsigned</span> <span class="kt">long</span>
+<span class="nf">cfib</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">n</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">c</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">while</span> <span class="p">(</span><span class="o">--</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">b</span><span class="p">;</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">b</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Now that we have a a C function we need to provide a way to convert our
+<a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a>s to and from C <code class="xref c c-type docutils literal"><span class="pre">unsigned</span> <span class="pre">long</span></code> objects to invoke this
+from Python.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">It is important to declare all functions as <code class="docutils literal"><span class="pre">static</span></code>. This is normally good
+practice in C but it is especially important when linking with CPython which
+is a very large project. We don&#8217;t want to pollute the namespace.</p>
+</div>
+<div class="section" id="pylongobject">
+<h2><a class="reference internal" href="appendix.html#c.PyLongObject" title="PyLongObject"><code class="xref c c-type docutils literal"><span class="pre">PyLongObject*</span></code></a><a class="headerlink" href="#pylongobject" title="Permalink to this headline">¶</a></h2>
+<p>Python <code class="xref c c-type docutils literal"><span class="pre">int</span></code> objects are concretely typed as a <a class="reference internal" href="appendix.html#c.PyLongObject" title="PyLongObject"><code class="xref c c-type docutils literal"><span class="pre">PyLongObject</span></code></a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Python <code class="xref c c-type docutils literal"><span class="pre">int</span></code> objects are called <a class="reference internal" href="appendix.html#c.PyLongObject" title="PyLongObject"><code class="xref c c-type docutils literal"><span class="pre">PyLongObject</span></code></a> in the C API
+as a holdover from when <code class="xref c c-type docutils literal"><span class="pre">int</span></code> and <code class="xref c c-type docutils literal"><span class="pre">long</span></code> were different in
+Python 2. In Python 3: <code class="xref c c-type docutils literal"><span class="pre">int</span></code> is arbitrarily sized like the old Python
+2 <code class="xref c c-type docutils literal"><span class="pre">long</span></code>.</p>
+</div>
+</div>
+<div class="section" id="adapting-long-objects">
+<h2>Adapting Long Objects<a class="headerlink" href="#adapting-long-objects" title="Permalink to this headline">¶</a></h2>
+<p>For many primitive C types, CPython provides functions to convert to and from
+Python objects. For <code class="xref c c-type docutils literal"><span class="pre">unsigned</span> <span class="pre">long</span></code>, we can use
+<a class="reference internal" href="appendix.html#c.PyLong_FromUnsignedLong" title="PyLong_FromUnsignedLong"><code class="xref c c-func docutils literal"><span class="pre">PyLong_FromUnsignedLong()</span></code></a> and <a class="reference internal" href="appendix.html#c.PyLong_AsUnsignedLong" title="PyLong_AsUnsignedLong"><code class="xref c c-func docutils literal"><span class="pre">PyLong_AsUnsignedLong()</span></code></a> to convert
+to and from C unsigned long objects.</p>
+<p>We can then write a wrapping function to do this conversion for us:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">PyObject</span> <span class="o">*</span>
+<span class="nf">pyfib</span><span class="p">(</span><span class="n">PyObject</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="n">PyObject</span> <span class="o">*</span><span class="n">n</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">as_unsigned_long</span> <span class="o">=</span> <span class="n">PyLong_AsUnsignedLong</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+    <span class="n">PyObject</span> <span class="o">*</span><span class="n">result</span> <span class="o">=</span> <span class="n">PyLong_FromUnsignedLong</span><span class="p">(</span><span class="n">cfib</span><span class="p">(</span><span class="n">as_unsigned</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The wrapping function needs a <code class="docutils literal"><span class="pre">PyObject*</span> <span class="pre">self</span></code> argument. This is a requirement
+for all functions and methods in the C API. The second argument <code class="docutils literal"><span class="pre">PyObject*</span> <span class="pre">n</span></code>
+is the input we want to receive from the Python caller.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Right now we are ignoring the fact that <code class="docutils literal"><span class="pre">n</span></code> might not actually be a
+<a class="reference internal" href="appendix.html#c.PyLongObject" title="PyLongObject"><code class="xref c c-type docutils literal"><span class="pre">PyLongObject*</span></code></a>. We will get to error handling later.</p>
+</div>
+</div>
+<div class="section" id="creating-a-python-callable-object">
+<h2>Creating a Python Callable Object<a class="headerlink" href="#creating-a-python-callable-object" title="Permalink to this headline">¶</a></h2>
+<p>Given our wrapping function, we still need a way to pass the function to Python
+to be called. To do this, we need to associate some extra metadata with our C
+function. This metadata is stored along with the function in a
+<a class="reference internal" href="appendix.html#c.PyMethodDef" title="PyMethodDef"><code class="xref c c-type docutils literal"><span class="pre">PyMethodDef</span></code></a> structure.</p>
+<p>This structure defines the name of the function as it will appear in Python, the
+pointer to the C implementation, information about how to invoke the function,
+and finally the docstring.</p>
+<p>A <a class="reference internal" href="appendix.html#c.PyMethodDef" title="PyMethodDef"><code class="xref c c-type docutils literal"><span class="pre">PyMethodDef</span></code></a> for our <code class="docutils literal"><span class="pre">pyfib</span></code> function looks like:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">PyDOC_STRVAR</span><span class="p">(</span><span class="n">fib_doc</span><span class="p">,</span> <span class="s">&quot;computes the nth Fibonacci number);</span>
+<span class="n">PyMethodDef</span> <span class="n">fib_method</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&quot;fib&quot;</span><span class="p">,</span>                <span class="cm">/* The name as a C string. */</span>
+    <span class="p">(</span><span class="n">PyCFunction</span><span class="p">)</span> <span class="n">pyfib</span><span class="p">,</span>  <span class="cm">/* The C function to invoke. */</span>
+    <span class="n">METH_O</span><span class="p">,</span>               <span class="cm">/* Flags telling Python how to invoke ``pyfib`` */</span>
+    <span class="n">fib_doc</span><span class="p">,</span>              <span class="cm">/* The docstring as a C string. */</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<div class="section" id="pydoc-strvar">
+<h3><a class="reference internal" href="appendix.html#c.PyDoc_STRVAR" title="PyDoc_STRVAR"><code class="xref c c-func docutils literal"><span class="pre">PyDoc_STRVAR()</span></code></a><a class="headerlink" href="#pydoc-strvar" title="Permalink to this headline">¶</a></h3>
+<p>We don&#8217;t just use a normal <code class="xref c c-type docutils literal"><span class="pre">const</span> <span class="pre">char*</span></code> for the docstring because
+CPython can be compiled to not include docstrings. This is useful on platforms
+with less available RAM. To properly respect this compile time option we wrap
+all docstrings in the <a class="reference internal" href="appendix.html#c.PyDoc_STRVAR" title="PyDoc_STRVAR"><code class="xref c c-func docutils literal"><span class="pre">PyDoc_STRVAR()</span></code></a> macro.</p>
+</div>
+<div class="section" id="meth-o">
+<h3><a class="reference internal" href="appendix.html#c.METH_O" title="METH_O"><code class="xref c c-macro docutils literal"><span class="pre">METH_O</span></code></a><a class="headerlink" href="#meth-o" title="Permalink to this headline">¶</a></h3>
+<p>For our function we only accept a single argument as a <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> so we
+can use the <a class="reference internal" href="appendix.html#c.METH_O" title="METH_O"><code class="xref c c-macro docutils literal"><span class="pre">METH_O</span></code></a> flag. For a list of the available flags see:
+<code class="xref c c-member docutils literal"><span class="pre">PyMethodDef.ml_flags</span></code>.</p>
+</div>
+<div class="section" id="creating-a-python-module">
+<h3>Creating a Python Module<a class="headerlink" href="#creating-a-python-module" title="Permalink to this headline">¶</a></h3>
+<p>The last thing we need to do to export our <code class="docutils literal"><span class="pre">fib</span></code> function to Python is put it
+in a module to be imported. Like a <a class="reference internal" href="appendix.html#c.PyMethodDef" title="PyMethodDef"><code class="xref c c-type docutils literal"><span class="pre">PyMethodDef</span></code></a>, a
+<a class="reference internal" href="appendix.html#c.PyModuleDef" title="PyModuleDef"><code class="xref c c-type docutils literal"><span class="pre">PyModuleDef</span></code></a> is some metadata which describes a Python module object.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">PyMethodDef</span> <span class="n">methods</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">{</span><span class="s">&quot;fib&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">PyCFunction</span><span class="p">)</span> <span class="n">pyfib</span><span class="p">,</span> <span class="n">METH_O</span><span class="p">,</span> <span class="n">fib_doc</span><span class="p">},</span>
+    <span class="p">{</span><span class="nb">NULL</span><span class="p">},</span>
+<span class="p">};</span>
+
+<span class="n">PyDoc_STRVAR</span><span class="p">(</span><span class="n">fib_module_doc</span><span class="p">,</span> <span class="s">&quot;provides a Fibonacci function&quot;</span><span class="p">);</span>
+
+<span class="n">PyModuleDef</span> <span class="n">fib_module</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">PyModuleDef_HEAD_INIT</span><span class="p">,</span>
+    <span class="s">&quot;fib&quot;</span><span class="p">,</span>
+    <span class="n">fib_module_doc</span><span class="p">,</span>
+    <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">methods</span><span class="p">,</span>
+    <span class="nb">NULL</span><span class="p">,</span>
+    <span class="nb">NULL</span><span class="p">,</span>
+    <span class="nb">NULL</span><span class="p">,</span>
+    <span class="nb">NULL</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The module initialization always starts with <code class="docutils literal"><span class="pre">PyModuleDef_HEAD_INIT</span></code> to setup
+the part of the <code class="docutils literal"><span class="pre">PyModuleDef</span></code> which is managed by CPython.</p>
+<p>Next is the name of the module as a C string.</p>
+<p>After the name is the module&#8217;s docstring. Like in a <a class="reference internal" href="appendix.html#c.PyMethodDef" title="PyMethodDef"><code class="xref c c-type docutils literal"><span class="pre">PyMethodDef</span></code></a>, we
+need to use <a class="reference internal" href="appendix.html#c.PyDoc_STRVAR" title="PyDoc_STRVAR"><code class="xref c c-func docutils literal"><span class="pre">PyDoc_STRVAR()</span></code></a> to define the docstring so that it can be
+disabled at compile time.</p>
+<p>The <code class="docutils literal"><span class="pre">-1</span></code> is the size of the module&#8217;s global state. For our simple <code class="docutils literal"><span class="pre">fib</span></code>
+module we don&#8217;t have any state so this can be set to <code class="docutils literal"><span class="pre">-1</span></code>.</p>
+<p>Next is a <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> terminated array of methods to put at module scope in
+this module. We have created an array with just our <code class="docutils literal"><span class="pre">pyfib</span></code> function, but we
+could include more than one function if we needed to.</p>
+<p>Finally we have a bunch of function pointers for managing the module&#8217;s global
+state. When we don&#8217;t have any state (the size if <code class="docutils literal"><span class="pre">-1</span></code>), we can set these all
+to <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code>.</p>
+</div>
+</div>
+<div class="section" id="making-the-shared-object-importable">
+<h2>Making The Shared Object Importable<a class="headerlink" href="#making-the-shared-object-importable" title="Permalink to this headline">¶</a></h2>
+<p>With our function and module defined, we need to tell CPython how to import our
+module. To do that we need to define a single function with type
+<a class="reference internal" href="appendix.html#c.PyMODINIT_FUNC" title="PyMODINIT_FUNC"><code class="xref c c-macro docutils literal"><span class="pre">PyMODINIT_FUNC</span></code></a> named <code class="docutils literal"><span class="pre">PyInit_{name}</span></code> where <code class="docutils literal"><span class="pre">name</span></code> is the name of
+our module.</p>
+<p>This function will be executed the first time someone writes <code class="docutils literal"><span class="pre">import</span> <span class="pre">fib.fib</span></code>
+from python. This can be thought of as the code that runs at &#8220;module scope&#8221; in a
+normal Python file.</p>
+<p>At the end of our function we need to return the newly created module. To
+actually create a <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> from a <code class="xref c c-type docutils literal"><span class="pre">PyModule_Def</span></code> we can use
+<a class="reference internal" href="appendix.html#c.PyModule_Create" title="PyModule_Create"><code class="xref c c-func docutils literal"><span class="pre">PyModule_Create()</span></code></a>.</p>
+<p>An example <a class="reference internal" href="appendix.html#c.PyMODINIT_FUNC" title="PyMODINIT_FUNC"><code class="xref c c-macro docutils literal"><span class="pre">PyMODINIT_FUNC</span></code></a> for our fib module looks like:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">PyMODINIT_FUNC</span>
+<span class="nf">PyInit_fib</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">PyModule_Create</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fib_module</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="building-and-importing.html" class="btn btn-neutral float-right" title="Building and Importing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="c-level-representation.html" class="btn btn-neutral" title="C Level Representation of Python Structures" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Joe Jevnik.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

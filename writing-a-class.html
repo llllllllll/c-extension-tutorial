@@ -1,0 +1,482 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Writing a New Class in C &mdash; c-extension-tutorial  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="c-extension-tutorial  documentation" href="index.html"/>
+        <link rel="next" title="Appendix" href="appendix.html"/>
+        <link rel="prev" title="Fancy Argument Parsing" href="fancy-argument-parsing.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> c-extension-tutorial
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="what-is-an-extension-module.html">What is an Extension Module?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="c-level-representation.html">C Level Representation of Python Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-function.html">Writing a New Function in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-and-importing.html">Building and Importing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error-handling.html">Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="abstract-api.html">Abstract Object API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fancy-argument-parsing.html">Fancy Argument Parsing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Writing a New Class in C</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#instance-data">Instance Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#slots-without-a-python-equivalent">Slots Without a Python Equivalent</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#allocation-an-deallocation">Allocation an Deallocation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#garbage-collection">Garbage Collection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flags">Flags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#defining-a-pytypeobject">Defining a <code class="docutils literal"><span class="pre">PyTypeObject</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#readying-a-type">Readying a Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implement-queue-push-and-queue-pop">Implement <code class="docutils literal"><span class="pre">Queue.push</span></code> and <code class="docutils literal"><span class="pre">Queue.pop</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">c-extension-tutorial</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Writing a New Class in C</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/writing-a-class.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="writing-a-new-class-in-c">
+<h1>Writing a New Class in C<a class="headerlink" href="#writing-a-new-class-in-c" title="Permalink to this headline">¶</a></h1>
+<p>So far we have discussed writing our own free functions, but, one of the nice
+things about Python is that we can group related functions and data into a
+class. The C API also allows us to write classes, though it is a lot of work.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If you just need to optimize one or two methods, write <em>only</em> those methods
+in C as free functions. Writing a new type is a much more work and harder to
+maintain.</p>
+</div>
+<p>A type or class in Python holds the size in bytes to allocate for each new
+instance and a virtual function table to resolve methods.</p>
+<p>If we think back to the layout of a <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject</span></code></a>, we have at least two
+fields: <a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_type" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">PyObject.ob_type</span></code></a>, a pointer to the type for the instance,
+and then <a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_refcnt" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">PyObject.ob_refcnt</span></code></a>, the number of references to this
+object. The instance knows how to find the implementation for all of the methods
+by looking up its own type from the <a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_type" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">PyObject.ob_type</span></code></a> field and then
+finding the given method in the type object.</p>
+<p>For example: given the Python expression: <code class="docutils literal"><span class="pre">repr(ob)</span></code>, we can start by
+converting that into the equivalent C API call:
+<code class="docutils literal"><span class="pre">PyObject_Repr(ob)</span></code>. <a class="reference internal" href="appendix.html#c.PyObject_Repr" title="PyObject_Repr"><code class="xref c c-func docutils literal"><span class="pre">PyObject_Repr()</span></code></a> boils down into the following
+call:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">PyObject</span><span class="o">*</span> <span class="n">result</span> <span class="o">=</span> <span class="n">Py_TYPE</span><span class="p">(</span><span class="n">ob</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">tp_repr</span><span class="p">(</span><span class="n">ob</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Walking through this line, we start by getting a reference to the type of <code class="docutils literal"><span class="pre">ob</span></code>
+with <a class="reference internal" href="appendix.html#c.Py_TYPE" title="Py_TYPE"><code class="xref c c-func docutils literal"><span class="pre">Py_TYPE()</span></code></a>. We then lookup the <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_repr" title="PyTypeObject.tp_repr"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_repr</span></code></a> slot
+from the type of <code class="docutils literal"><span class="pre">ob</span></code> which is the implementation <a class="reference external" href="https://docs.python.org/3/library/functions.html#repr" title="(in Python v3.6)"><code class="xref py py-func docutils literal"><span class="pre">repr()</span></code></a> for <code class="docutils literal"><span class="pre">ob</span></code>.</p>
+<p>There are slots for many of the builtin functions, for example:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">__getattr__</span></code>: <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_getattro" title="PyTypeObject.tp_getattro"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_getattro</span></code></a></li>
+<li><code class="docutils literal"><span class="pre">__setattr__</span></code>: <a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyTypeObject.tp_setattro" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_setattro</span></code></a></li>
+<li><code class="docutils literal"><span class="pre">__call__</span></code>: <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_call" title="PyTypeObject.tp_call"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_call</span></code></a></li>
+</ul>
+<p>and so on.</p>
+<p>This works well for Python&#8217;s special methods because it is a finite set of
+functions that are called a lot, but types can define their own methods. For
+example, given the class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PythonClass</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;PythonClass instance&gt;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;something&#39;</span>
+</pre></div>
+</div>
+<p>we know that there is a slot to hold <code class="docutils literal"><span class="pre">__repr__</span></code>, but what about
+<code class="docutils literal"><span class="pre">method</span></code>. This is not a special method that CPython uses so there is no
+reserved slot in the <a class="reference internal" href="appendix.html#c.PyTypeObject" title="PyTypeObject"><code class="xref c c-type docutils literal"><span class="pre">PyTypeObject</span></code></a> struct. For these more free form
+methods, types keep a Python dictionary object in the slot
+<a class="reference internal" href="appendix.html#c.PyTypeObject.tp_dict" title="PyTypeObject.tp_dict"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_dict</span></code></a> from name to function object. Dispatching
+through this dictionary is slower than going directly to the slot, but it is
+required to allow these arbitrary names.</p>
+<p>When defining methods on our type, we can lookup the values of these members on
+<code class="docutils literal"><span class="pre">self</span></code> just like we would in Python.</p>
+<div class="section" id="instance-data">
+<h2>Instance Data<a class="headerlink" href="#instance-data" title="Permalink to this headline">¶</a></h2>
+<p>Using the type&#8217;s slots or dictionary we can register methods for a given type,
+but the data needs to be stored on the instance itself. When defining a new
+class, we define the struct to represent an instance of the class. This struct
+needs to start with a <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject</span></code></a> field (note: not a pointer, a
+<a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject</span></code></a> by <em>value</em>) which holds a pointer to our type and
+<a class="reference internal" href="appendix.html#ref-count"><span class="std std-ref">reference count</span></a>. Starting our struct with a
+<a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject</span></code></a> makes it safe to cast to and from <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> because
+a pointer to a struct is equivalent to a pointer to its first member according
+to the C standard.</p>
+<p>After the <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject</span></code></a> member, which is often called <code class="docutils literal"><span class="pre">base</span></code>, we define
+the instance data. Instance data can be a mix of Python values stored as
+<a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> or regular C data.</p>
+<p>For example, the following struct is for a class with a python <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">list</span></code></a>
+field, a <a class="reference internal" href="appendix.html#c.Py_ssize_t" title="Py_ssize_t"><code class="xref c c-type docutils literal"><span class="pre">Py_ssize_t</span></code></a> field, and a <code class="xref c c-type docutils literal"><span class="pre">const</span> <span class="pre">char*</span></code> field.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">PyObject</span> <span class="n">base</span><span class="p">;</span>  <span class="cm">/* the base object values */</span>
+    <span class="n">PyObject</span><span class="o">*</span> <span class="n">list_field</span><span class="p">;</span>  <span class="cm">/* a pointer to our list member */</span>
+    <span class="n">Py_ssize_t</span> <span class="n">ssize_t_field</span><span class="p">;</span>  <span class="cm">/* our Py_ssize_t member */</span>
+    <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">string_field</span><span class="p">;</span>  <span class="cm">/* our const char* member */</span>
+<span class="p">}</span> <span class="n">myobject</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="slots-without-a-python-equivalent">
+<h2>Slots Without a Python Equivalent<a class="headerlink" href="#slots-without-a-python-equivalent" title="Permalink to this headline">¶</a></h2>
+<p>While many slots have a 1:1 correspondence with a Python special method, there
+are a few extra slots that we can control when writing a type in C.</p>
+<div class="section" id="allocation-an-deallocation">
+<h3>Allocation an Deallocation<a class="headerlink" href="#allocation-an-deallocation" title="Permalink to this headline">¶</a></h3>
+<p>Part of the definition of a class is how to allocate and deallocate
+instances. This is controlled through the <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_alloc" title="PyTypeObject.tp_alloc"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_alloc</span></code></a> and
+<a class="reference internal" href="appendix.html#c.PyTypeObject.tp_free" title="PyTypeObject.tp_free"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_free</span></code></a> slots.</p>
+<p>When we call <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_new" title="PyTypeObject.tp_new"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_new</span></code></a> (<code class="docutils literal"><span class="pre">__new__</span></code>), we use
+<a class="reference internal" href="appendix.html#c.PyTypeObject.tp_alloc" title="PyTypeObject.tp_alloc"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_alloc</span></code></a> to actually get the memory to store
+<code class="docutils literal"><span class="pre">self</span></code>. In Python, we do this with a call to <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__new__" title="(in Python v3.6)"><code class="xref py py-meth docutils literal"><span class="pre">object.__new__()</span></code></a>; however,
+in a C extension type we can pick our allocation strategy.</p>
+<p>In almost all cases, we should use the standard Python allocator which is the
+default value for <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_alloc" title="PyTypeObject.tp_alloc"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_alloc</span></code></a> and
+<a class="reference internal" href="appendix.html#c.PyTypeObject.tp_free" title="PyTypeObject.tp_free"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_free</span></code></a>. Only use a new allocator if that is core to
+what you are trying to do.</p>
+</div>
+<div class="section" id="garbage-collection">
+<h3>Garbage Collection<a class="headerlink" href="#garbage-collection" title="Permalink to this headline">¶</a></h3>
+<p>While CPython uses a reference counting system where objects are deallocated as
+soon as their <a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_refcnt" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">PyObject.ob_refcnt</span></code></a> hits 0, there are cases where a
+cycle can form between objects which needs to be manually broken.</p>
+<p>Classes implemented in C can hook into this machinery by implementing
+<a class="reference internal" href="appendix.html#c.PyTypeObject.tp_traverse" title="PyTypeObject.tp_traverse"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_traverse</span></code></a> and <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_clear" title="PyTypeObject.tp_clear"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_clear</span></code></a>
+functions.</p>
+<p>The <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_traverse" title="PyTypeObject.tp_traverse"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_traverse</span></code></a> function allows the garbage collector
+to touch all of the objects our instance has a reference to. This is used for
+cycle detection.</p>
+<p>The <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_clear" title="PyTypeObject.tp_clear"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_clear</span></code></a> function allows the garbage collector to
+break cycles by explicitly clearing all the references on a chosen object.</p>
+</div>
+<div class="section" id="flags">
+<h3>Flags<a class="headerlink" href="#flags" title="Permalink to this headline">¶</a></h3>
+<p>There is a special slot called <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_flags" title="PyTypeObject.tp_flags"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_flags</span></code></a> which is a
+bitmask of boolean values about a type. One of the bits is
+<a class="reference internal" href="appendix.html#c.Py_TPFLAGS_HAVE_GC" title="Py_TPFLAGS_HAVE_GC"><code class="xref c c-macro docutils literal"><span class="pre">Py_TPFLAGS_HAVE_GC</span></code></a> which says that a type can hold references and
+needs to participate in the cyclic garbage collector. Other flags like
+<a class="reference internal" href="appendix.html#c.Py_TPFLAGS_LONG_SUBCLASS" title="Py_TPFLAGS_LONG_SUBCLASS"><code class="xref c c-macro docutils literal"><span class="pre">Py_TPFLAGS_LONG_SUBCLASS</span></code></a> mark that a class is a subclass of
+<a class="reference internal" href="appendix.html#c.PyLongObject" title="PyLongObject"><code class="xref c c-type docutils literal"><span class="pre">PyLongObject</span></code></a>. This allows for faster isinstance checks against common
+types.</p>
+<p>When writing a new type, you should always start with
+<a class="reference internal" href="appendix.html#c.Py_TPFLAGS_DEFAULT" title="Py_TPFLAGS_DEFAULT"><code class="xref c c-macro docutils literal"><span class="pre">Py_TPFLAGS_DEFAULT</span></code></a> and <code class="docutils literal"><span class="pre">or</span></code> in the other options.</p>
+</div>
+</div>
+<div class="section" id="defining-a-pytypeobject">
+<h2>Defining a <a class="reference internal" href="appendix.html#c.PyTypeObject" title="PyTypeObject"><code class="xref c c-type docutils literal"><span class="pre">PyTypeObject</span></code></a><a class="headerlink" href="#defining-a-pytypeobject" title="Permalink to this headline">¶</a></h2>
+<p>Now that we understand a bit about the layout of types and instances, let&#8217;s see
+what a new type definition looks like. Below we define a class <code class="docutils literal"><span class="pre">Queue</span></code> with
+two members: <code class="docutils literal"><span class="pre">Py_ssize_t</span> <span class="pre">q_maxsize</span></code> and <code class="docutils literal"><span class="pre">PyObject*</span> <span class="pre">q_elements</span></code>. The
+<code class="docutils literal"><span class="pre">q_maxsize</span></code> is the maximum number of elements in the queue, and <code class="docutils literal"><span class="pre">q_elements</span></code>
+are the elements in the queue as Python <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">list</span></code></a>.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+     <span class="n">PyObject</span> <span class="n">q_base</span><span class="p">;</span>       <span class="cm">/* storage for our type and reference count */</span>
+     <span class="n">Py_ssize_t</span> <span class="n">q_maxsize</span><span class="p">;</span>  <span class="cm">/* the maximum number of elements in q_elements */</span>
+     <span class="n">PyObject</span><span class="o">*</span> <span class="n">q_elements</span><span class="p">;</span>  <span class="cm">/* the elements in the queue as a Python list */</span>
+ <span class="p">}</span> <span class="n">queue</span><span class="p">;</span>
+
+ <span class="cm">/* function implementations */</span>
+
+<span class="k">static</span> <span class="n">PyTypeObject</span> <span class="n">queue_type</span> <span class="o">=</span> <span class="p">{</span>
+     <span class="n">PyVarObject_HEAD_INIT</span><span class="p">(</span><span class="o">&amp;</span><span class="n">PyType_Type</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+     <span class="s">&quot;queue.Queue&quot;</span><span class="p">,</span>                              <span class="cm">/* tp_name */</span>
+     <span class="k">sizeof</span><span class="p">(</span><span class="n">queue</span><span class="p">),</span>                              <span class="cm">/* tp_basicsize */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_itemsize */</span>
+     <span class="p">(</span><span class="n">destructor</span><span class="p">)</span> <span class="n">queue_dealloc</span><span class="p">,</span>                 <span class="cm">/* tp_dealloc */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_print */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_getattr */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_setattr */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_reserved */</span>
+     <span class="p">(</span><span class="n">reprfunc</span><span class="p">)</span> <span class="n">queue_repr</span><span class="p">,</span>                      <span class="cm">/* tp_repr */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_as_number */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_as_sequence */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_as_mapping */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_hash */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_call */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_str */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_getattro */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_setattro */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_as_buffer */</span>
+     <span class="n">Py_TPFLAGS_DEFAULT</span> <span class="o">|</span>
+     <span class="n">Py_TPFLAGS_HAVE_GC</span><span class="p">,</span>                         <span class="cm">/* tp_flags */</span>
+     <span class="n">queue_doc</span><span class="p">,</span>                                  <span class="cm">/* tp_doc */</span>
+     <span class="p">(</span><span class="n">traverseproc</span><span class="p">)</span> <span class="n">queue_traverse</span><span class="p">,</span>              <span class="cm">/* tp_traverse */</span>
+     <span class="p">(</span><span class="n">inquiry</span><span class="p">)</span> <span class="n">queue_clear</span><span class="p">,</span>                      <span class="cm">/* tp_clear */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_richcompare */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_weaklistoffset */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_iter */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_iternext */</span>
+     <span class="n">queue_methods</span><span class="p">,</span>                              <span class="cm">/* tp_methods */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_members */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_getset */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_base */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_dict */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_descr_get */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_descr_set */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_dictoffset */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_init */</span>
+     <span class="mi">0</span><span class="p">,</span>                                          <span class="cm">/* tp_alloc */</span>
+     <span class="p">(</span><span class="n">newfunc</span><span class="p">)</span> <span class="n">queue_new</span><span class="p">,</span>                        <span class="cm">/* tp_new */</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>This is the definition for a class called <code class="docutils literal"><span class="pre">Queue</span></code> from python an <code class="docutils literal"><span class="pre">queue</span></code>
+from C. Instances are defined by the <code class="docutils literal"><span class="pre">queue</span></code> struct at the top. The type
+implements only a subset of the possible functions.</p>
+<p>The <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_basicsize" title="PyTypeObject.tp_basicsize"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_basicsize</span></code></a> is set to be the size of out <code class="docutils literal"><span class="pre">queue</span></code>
+struct. This means that instances of a <code class="docutils literal"><span class="pre">Queue</span></code> are of size <code class="docutils literal"><span class="pre">queue</span></code>.</p>
+<p>The <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_itemsize" title="PyTypeObject.tp_itemsize"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_itemsize</span></code></a> is set to 0 because all instances of
+<code class="docutils literal"><span class="pre">queue</span></code> use the same amount of space. This field is designed to implement
+compact collections like <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></a>.</p>
+<p>The <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_dealloc" title="PyTypeObject.tp_dealloc"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_dealloc</span></code></a> is set to a deallocation function. This
+function needs to release the <code class="docutils literal"><span class="pre">queue</span></code>&#8216;s reference to <code class="docutils literal"><span class="pre">q_elements</span></code>.</p>
+<p>The <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_flags" title="PyTypeObject.tp_flags"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_flags</span></code></a> is set to <a class="reference internal" href="appendix.html#c.Py_TPFLAGS_DEFAULT" title="Py_TPFLAGS_DEFAULT"><code class="xref c c-macro docutils literal"><span class="pre">Py_TPFLAGS_DEFAULT</span></code></a> |
+<a class="reference internal" href="appendix.html#c.Py_TPFLAGS_HAVE_GC" title="Py_TPFLAGS_HAVE_GC"><code class="xref c c-macro docutils literal"><span class="pre">Py_TPFLAGS_HAVE_GC</span></code></a>. This means we have both the default flags and the
+HAVE_GC bit. Because the <a class="reference internal" href="appendix.html#c.Py_TPFLAGS_HAVE_GC" title="Py_TPFLAGS_HAVE_GC"><code class="xref c c-macro docutils literal"><span class="pre">Py_TPFLAGS_HAVE_GC</span></code></a> bit is set, we also have
+a <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_traverse" title="PyTypeObject.tp_traverse"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_traverse</span></code></a> and <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_clear" title="PyTypeObject.tp_clear"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_clear</span></code></a>
+function.</p>
+<p>This type also has some custom methods so we need to pass an array to
+<a class="reference internal" href="appendix.html#c.PyTypeObject.tp_methods" title="PyTypeObject.tp_methods"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_methods</span></code></a>.</p>
+<p>Finally, we need to construct our new objects so we have a
+<a class="reference internal" href="appendix.html#c.PyTypeObject.tp_new" title="PyTypeObject.tp_new"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_new</span></code></a> function set.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_new" title="PyTypeObject.tp_new"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_new</span></code></a> is <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code>, you cannot create new
+instances of the class.</p>
+</div>
+<p>There are many more slots that we are not using because we don&#8217;t need them. You
+can read about what the slots are for in the docs for <a class="reference internal" href="appendix.html#c.PyTypeObject" title="PyTypeObject"><code class="xref c c-type docutils literal"><span class="pre">PyTypeObject</span></code></a>.</p>
+</div>
+<div class="section" id="readying-a-type">
+<h2>Readying a Type<a class="headerlink" href="#readying-a-type" title="Permalink to this headline">¶</a></h2>
+<p>Our <code class="docutils literal"><span class="pre">queue_type</span></code> struct has a lot of <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> members because we want to
+inherit their value from our base class, which in this case is
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a>. Looking back at the code in <a class="reference internal" href="appendix.html#c.PyObject_Repr" title="PyObject_Repr"><code class="xref c c-func docutils literal"><span class="pre">PyObject_Repr()</span></code></a> above, you
+can see that we are not doing a <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> check or class traversal, we just
+get the <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_repr" title="PyTypeObject.tp_repr"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_repr</span></code></a> and call it. In order to avoid these
+checks Python has a function called <a class="reference internal" href="appendix.html#c.PyType_Ready" title="PyType_Ready"><code class="xref c c-func docutils literal"><span class="pre">PyType_Ready()</span></code></a> which copies the
+slots down from the base class. This function also copies any methods that are
+stored in the <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_dict" title="PyTypeObject.tp_dict"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_dict</span></code></a>.</p>
+<p>To ready a type, call <a class="reference internal" href="appendix.html#c.PyType_Ready" title="PyType_Ready"><code class="xref c c-func docutils literal"><span class="pre">PyType_Ready()</span></code></a> in the <a class="reference internal" href="appendix.html#c.PyMODINIT_FUNC" title="PyMODINIT_FUNC"><code class="xref c c-macro docutils literal"><span class="pre">PyMODINIT_FUNC</span></code></a>
+for the module defining the class.</p>
+</div>
+<div class="section" id="implement-queue-push-and-queue-pop">
+<h2>Implement <code class="docutils literal"><span class="pre">Queue.push</span></code> and <code class="docutils literal"><span class="pre">Queue.pop</span></code><a class="headerlink" href="#implement-queue-push-and-queue-pop" title="Permalink to this headline">¶</a></h2>
+<p>As an exercise, implementat for <code class="docutils literal"><span class="pre">Queue.push</span></code> and <code class="docutils literal"><span class="pre">Queue.pop</span></code>. Try to
+implement these functions using the <a class="reference internal" href="appendix.html#c.PyListObject" title="PyListObject"><code class="xref c c-type docutils literal"><span class="pre">PyListObject</span></code></a> API functions.</p>
+<p>Use <a class="reference internal" href="appendix.html#c.PyArg_ParseTupleAndKeywords" title="PyArg_ParseTupleAndKeywords"><code class="xref c c-func docutils literal"><span class="pre">PyArg_ParseTupleAndKeywords()</span></code></a> to accept arguments for
+<code class="docutils literal"><span class="pre">Queue.push</span></code>. <code class="docutils literal"><span class="pre">Queue.pop</span></code> should use <a class="reference internal" href="appendix.html#c.METH_NOARGS" title="METH_NOARGS"><code class="xref c c-macro docutils literal"><span class="pre">METH_NOARGS</span></code></a> and just accept
+<code class="docutils literal"><span class="pre">self</span></code>.</p>
+<p>Remember to check for exceptions after calling API functions.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="appendix.html" class="btn btn-neutral float-right" title="Appendix" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="fancy-argument-parsing.html" class="btn btn-neutral" title="Fancy Argument Parsing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Joe Jevnik.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,361 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Building and Importing &mdash; c-extension-tutorial  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="c-extension-tutorial  documentation" href="index.html"/>
+        <link rel="next" title="Error Handling" href="error-handling.html"/>
+        <link rel="prev" title="Writing a New Function in C" href="writing-a-function.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> c-extension-tutorial
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="what-is-an-extension-module.html">What is an Extension Module?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="c-level-representation.html">C Level Representation of Python Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-function.html">Writing a New Function in C</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Building and Importing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#compiling-the-module">Compiling the Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building">Building</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#importing-and-using">Importing and Using</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#invalid-arguments">Invalid Arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#why-did-this-hang">Why Did this Hang?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="error-handling.html">Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="abstract-api.html">Abstract Object API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fancy-argument-parsing.html">Fancy Argument Parsing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-class.html">Writing a New Class in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">c-extension-tutorial</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Building and Importing</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/building-and-importing.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="building-and-importing">
+<h1>Building and Importing<a class="headerlink" href="#building-and-importing" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="compiling-the-module">
+<h2>Compiling the Module<a class="headerlink" href="#compiling-the-module" title="Permalink to this headline">¶</a></h2>
+<p>The most common way to build CPython extension modules is to use setuptools and
+a <code class="docutils literal"><span class="pre">setup.py</span></code> file. We start with a normal setuptools <code class="docutils literal"><span class="pre">setup.py</span></code> file, for
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">setuptools</span> <span class="kn">import</span> <span class="n">setup</span><span class="p">,</span> <span class="n">find_packages</span>
+
+
+<span class="n">setup</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;fib&#39;</span><span class="p">,</span>
+    <span class="n">version</span><span class="o">=</span><span class="s1">&#39;0.1.0&#39;</span><span class="p">,</span>
+    <span class="n">packages</span><span class="o">=</span><span class="n">find_packages</span><span class="p">(),</span>
+    <span class="n">license</span><span class="o">=</span><span class="s1">&#39;GPL-2&#39;</span><span class="p">,</span>
+    <span class="n">classifiers</span><span class="o">=</span><span class="p">[</span>
+        <span class="s1">&#39;Development Status :: 3 - Alpha&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;License :: OSI Approved :: GNU General Public License v2 (GPLv2)&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Natural Language :: English&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Programming Language :: Python :: 3 :: Only&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Programming Language :: Python :: Implementation :: CPython&#39;</span><span class="p">,</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>This defines a new package called <code class="docutils literal"><span class="pre">fib</span></code> with version &#8216;0.1.0&#8217; and some other
+metadata.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>In the classifiers we indicate:</p>
+<p><code class="docutils literal"><span class="pre">Programming</span> <span class="pre">Language</span> <span class="pre">::</span> <span class="pre">Python</span> <span class="pre">::</span> <span class="pre">Implementation</span> <span class="pre">::</span> <span class="pre">CPython</span></code></p>
+<p class="last">This indicates that our package requires CPython extension modules or
+implementation details and would not work on PyPy, Jython, or other Python
+implementations.</p>
+</div>
+<p>With the standard boilerplate in place we need to add the C extension specific
+parts. Start by importing the <code class="docutils literal"><span class="pre">Extension</span></code> type from <code class="docutils literal"><span class="pre">setuptools</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">setuptools</span> <span class="kn">import</span> <span class="n">setup</span><span class="p">,</span> <span class="n">find_packages</span><span class="p">,</span> <span class="n">Extension</span>
+</pre></div>
+</div>
+<p>Next, we need to add a list of all of the extension modules we need build to our
+call to <code class="docutils literal"><span class="pre">setup</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">setup</span><span class="p">(</span>
+    <span class="o">...</span><span class="p">,</span>  <span class="c1"># the arguments from before</span>
+    <span class="n">ext_modules</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Extension</span><span class="p">(</span>
+            <span class="c1"># the qualified name of the extension module to build</span>
+            <span class="s1">&#39;fib.fib&#39;</span><span class="p">,</span>
+            <span class="c1"># the files to compile into our module relative to ``setup.py``</span>
+            <span class="p">[</span><span class="s1">&#39;fib/fib.c&#39;</span><span class="p">],</span>
+        <span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">Extension</span></code> class makes sure we get the correct CPython headers and flags
+which were used to build the CPython invoking <code class="docutils literal"><span class="pre">setup.py</span></code>. We can customize the
+build process with arguments to <code class="docutils literal"><span class="pre">Extension</span></code>, but the default is enough to get
+us started.</p>
+</div>
+<div class="section" id="building">
+<h2>Building<a class="headerlink" href="#building" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s make sure our build environment is working.</p>
+<p>Run the following commands from the repo root:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> exercises/fib
+$ python setup.py build_ext --inplace
+</pre></div>
+</div>
+<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">build_ext</span> <span class="pre">--inplace</span></code> uses the <code class="docutils literal"><span class="pre">setup.py</span></code> to build our
+extension modules. The <code class="docutils literal"><span class="pre">--inplace</span></code> flag moves the compiled shared objects into
+the source tree so that they are in the Python search path.</p>
+</div>
+<div class="section" id="importing-and-using">
+<h2>Importing and Using<a class="headerlink" href="#importing-and-using" title="Permalink to this headline">¶</a></h2>
+<p>Now that the modules are built and moved to the search path, we can try to
+import and use the code in a normal repl. From the <code class="docutils literal"><span class="pre">fib</span></code> directory startup
+<code class="docutils literal"><span class="pre">ipython</span></code> and try some of the following expressions:</p>
+<div class="highlight-IPython"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">from</span> <span class="nn">fib</span> <span class="kn">import</span> <span class="n">fib</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">fib</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="mi">1</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="n">fib</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="mi">1</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="n">fib</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="mi">2</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">5</span><span class="p">]:</span> <span class="n">fib</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">5</span><span class="p">]:</span> <span class="mi">55</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="invalid-arguments">
+<h2>Invalid Arguments<a class="headerlink" href="#invalid-arguments" title="Permalink to this headline">¶</a></h2>
+<p>Think back to our definition of <code class="docutils literal"><span class="pre">pyfib</span></code> in C. We started with:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">PyObject</span> <span class="o">*</span>
+<span class="nf">pyfib</span><span class="p">(</span><span class="n">PyObject</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="n">PyObject</span> <span class="o">*</span><span class="n">n</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">as_unsigned_long</span> <span class="o">=</span> <span class="n">PyLong_AsUnsignedLong</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+    <span class="cm">/* ... */</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>What happens if <code class="docutils literal"><span class="pre">n</span></code> is not actually an <code class="xref c c-type docutils literal"><span class="pre">int</span></code> object? Try <code class="docutils literal"><span class="pre">fib('a')</span></code>
+or another non-int object.</p>
+<p>If <code class="docutils literal"><span class="pre">C-c</span></code> doesn&#8217;t kill the session, you might need to use <code class="docutils literal"><span class="pre">C-z</span></code> and then <code class="docutils literal"><span class="pre">$</span>
+<span class="pre">kill</span> <span class="pre">%1</span></code>.</p>
+</div>
+<div class="section" id="why-did-this-hang">
+<h2>Why Did this Hang?<a class="headerlink" href="#why-did-this-hang" title="Permalink to this headline">¶</a></h2>
+<p>When <code class="docutils literal"><span class="pre">n</span></code> is not an integer object, <a class="reference internal" href="appendix.html#c.PyLong_AsUnsignedLong" title="PyLong_AsUnsignedLong"><code class="xref c c-func docutils literal"><span class="pre">PyLong_AsUnsignedLong()</span></code></a> raises an
+exception and returns <code class="docutils literal"><span class="pre">(unsigned</span> <span class="pre">long)</span> <span class="pre">-1</span></code> which is
+<code class="xref c c-macro docutils literal"><span class="pre">UNSIGNED_LONG_MAX</span></code>. We ignore the error and enter the Fibonacci
+function&#8217;s loop which tries computing the <code class="docutils literal"><span class="pre">18446744073709551615</span></code>th Fibonacci
+number which will take a very long time.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="error-handling.html" class="btn btn-neutral float-right" title="Error Handling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="writing-a-function.html" class="btn btn-neutral" title="Writing a New Function in C" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Joe Jevnik.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

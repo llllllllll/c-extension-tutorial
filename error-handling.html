@@ -1,0 +1,331 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Error Handling &mdash; c-extension-tutorial  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="c-extension-tutorial  documentation" href="index.html"/>
+        <link rel="next" title="Abstract Object API" href="abstract-api.html"/>
+        <link rel="prev" title="Building and Importing" href="building-and-importing.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> c-extension-tutorial
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="what-is-an-extension-module.html">What is an Extension Module?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="c-level-representation.html">C Level Representation of Python Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-function.html">Writing a New Function in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-and-importing.html">Building and Importing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Error Handling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#global-exception-indicator">Global Exception Indicator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#propagating-errors">Propagating Errors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#null-pyobject"><code class="docutils literal"><span class="pre">NULL</span></code> <code class="docutils literal"><span class="pre">PyObject*</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#boolean-values">Boolean Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other">Other</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reference-counting">Reference Counting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#raising-exceptions">Raising Exceptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#standard-exceptions">Standard Exceptions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-error-handling-to-fib">Adding Error Handling to <code class="docutils literal"><span class="pre">fib</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="abstract-api.html">Abstract Object API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fancy-argument-parsing.html">Fancy Argument Parsing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-class.html">Writing a New Class in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">c-extension-tutorial</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Error Handling</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/error-handling.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="error-handling">
+<h1>Error Handling<a class="headerlink" href="#error-handling" title="Permalink to this headline">¶</a></h1>
+<p>The C programming language does not have exceptions in the same way that Python
+does. In C, all functions have a single return value which needs to encode the
+return value as well as the validity of the result.</p>
+<div class="section" id="global-exception-indicator">
+<h2>Global Exception Indicator<a class="headerlink" href="#global-exception-indicator" title="Permalink to this headline">¶</a></h2>
+<p>CPython uses three variables to store the state of the current exception. These
+hold the type of the current exception, the value of the current exception, and
+the Python traceback of the current exception. This is like an enhanced
+<code class="docutils literal"><span class="pre">errno</span></code>.</p>
+<p>These values can be set or queried with the <code class="docutils literal"><span class="pre">PyErr_*</span></code> family of functions.</p>
+</div>
+<div class="section" id="propagating-errors">
+<h2>Propagating Errors<a class="headerlink" href="#propagating-errors" title="Permalink to this headline">¶</a></h2>
+<p>If a C API function raises an error, the exception indicator will be set an a
+value will be returned which indicates that a failure occurred. As a consumer of
+an API function, you need to explicitly check for this error return value and
+return a value that indicates that your function has failed as well.</p>
+<div class="section" id="null-pyobject">
+<h3><code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a><a class="headerlink" href="#null-pyobject" title="Permalink to this headline">¶</a></h3>
+<p>In the CPython API, a <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> value is never valid for a
+<a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> so it is used to signal that an error has occurred. For
+example: <a class="reference internal" href="appendix.html#c.PyLong_FromUnsignedLong" title="PyLong_FromUnsignedLong"><code class="xref c c-func docutils literal"><span class="pre">PyLong_FromUnsignedLong()</span></code></a> returns a <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a>;
+however, when memory cannot be allocated a <code class="xref c c-data docutils literal"><span class="pre">PyExc_MemoryError</span></code> is set
+and <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> is returned.</p>
+<p>This is the most common error sentinel and is used for
+<a class="reference internal" href="appendix.html#c.PyCFunction" title="PyCFunction"><code class="xref c c-type docutils literal"><span class="pre">PyCFunction</span></code></a>s.</p>
+</div>
+<div class="section" id="boolean-values">
+<h3>Boolean Values<a class="headerlink" href="#boolean-values" title="Permalink to this headline">¶</a></h3>
+<p>If a function does not return a <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> it needs to specify a new
+error sentinel. A common case is a function which returns a boolean. In The C
+API, these functions will actually return an <code class="xref c c-type docutils literal"><span class="pre">int</span></code>, not <code class="docutils literal"><span class="pre">bool</span></code>. This
+allows for three states to be returned: <code class="docutils literal"><span class="pre">1</span> <span class="pre">=</span> <span class="pre">True</span></code>, <code class="docutils literal"><span class="pre">0</span> <span class="pre">=</span> <span class="pre">False</span></code>, and <code class="docutils literal"><span class="pre">-1</span> <span class="pre">=</span>
+<span class="pre">Error</span></code>.</p>
+</div>
+<div class="section" id="other">
+<h3>Other<a class="headerlink" href="#other" title="Permalink to this headline">¶</a></h3>
+<p>In very special cases a function will need to explicitly call out a new sentinel
+value. For example: <a class="reference internal" href="appendix.html#c.PyLong_AsUnsignedLong" title="PyLong_AsUnsignedLong"><code class="xref c c-func docutils literal"><span class="pre">PyLong_AsUnsignedLong()</span></code></a> returns the value of its
+argument as an unsigned long. No value in the codomain is unused so it specifies
+that <code class="xref c c-macro docutils literal"><span class="pre">UNSIGNED_LONG_MAX</span></code> will be returned and the user should check to
+see if an exception was raised with <a class="reference internal" href="appendix.html#c.PyErr_Occurred" title="PyErr_Occurred"><code class="xref c c-func docutils literal"><span class="pre">PyErr_Occurred()</span></code></a>.</p>
+</div>
+<div class="section" id="reference-counting">
+<h3>Reference Counting<a class="headerlink" href="#reference-counting" title="Permalink to this headline">¶</a></h3>
+<p>It is important to remember to cleanup any resources or references when exiting
+early for an exception. A common pattern is to use a <code class="docutils literal"><span class="pre">goto</span> <span class="pre">error</span></code> statement to
+cleanup all of your references before returning <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code>.</p>
+</div>
+</div>
+<div class="section" id="raising-exceptions">
+<h2>Raising Exceptions<a class="headerlink" href="#raising-exceptions" title="Permalink to this headline">¶</a></h2>
+<p>To explicitly set the error indicator we can use one of
+<a class="reference internal" href="appendix.html#c.PyErr_SetString" title="PyErr_SetString"><code class="xref c c-func docutils literal"><span class="pre">PyErr_SetString()</span></code></a> or <a class="reference internal" href="appendix.html#c.PyErr_Format" title="PyErr_Format"><code class="xref c c-func docutils literal"><span class="pre">PyErr_Format()</span></code></a>. These functions take an
+exception type and either a message or a message format string and raise the
+given Python exception. After setting the exception, we need to clean up our
+references and then return <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> or some other sentinel to indicate
+that our function failed.</p>
+<p>There are also helpers for raising common exceptions like:
+<code class="xref c c-func docutils literal"><span class="pre">PyErr_MemoryError()</span></code>.</p>
+<div class="section" id="standard-exceptions">
+<h3>Standard Exceptions<a class="headerlink" href="#standard-exceptions" title="Permalink to this headline">¶</a></h3>
+<p>All of the builtin exceptions are accessible in C with a naming scheme of
+<code class="docutils literal"><span class="pre">PyExc_{Name}</span></code> where <code class="docutils literal"><span class="pre">Name</span></code> is the name as it appears in Python. For
+example:</p>
+<p><code class="xref c c-data docutils literal"><span class="pre">PyExc_IndexError</span></code> is the same as <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#IndexError" title="(in Python v3.6)"><code class="xref py py-exc docutils literal"><span class="pre">IndexError</span></code></a> from within Python.</p>
+<p>A full list of exceptions can be found here:
+<a class="reference external" href="https://docs.python.org/3.6/c-api/exceptions.html#standard-exceptions">https://docs.python.org/3.6/c-api/exceptions.html#standard-exceptions</a></p>
+</div>
+</div>
+<div class="section" id="adding-error-handling-to-fib">
+<h2>Adding Error Handling to <code class="docutils literal"><span class="pre">fib</span></code><a class="headerlink" href="#adding-error-handling-to-fib" title="Permalink to this headline">¶</a></h2>
+<p>Now that we know about exception handling and propagation, lets try to guard
+against invalid input in <code class="docutils literal"><span class="pre">fib</span></code>.</p>
+<p>Open up <code class="docutils literal"><span class="pre">fib.c</span></code> and add error handling around <a class="reference internal" href="appendix.html#c.PyLong_AsUnsignedLong" title="PyLong_AsUnsignedLong"><code class="xref c c-func docutils literal"><span class="pre">PyLong_AsUnsignedLong()</span></code></a>
+to properly propagate exceptions.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="abstract-api.html" class="btn btn-neutral float-right" title="Abstract Object API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="building-and-importing.html" class="btn btn-neutral" title="Building and Importing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Joe Jevnik.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
