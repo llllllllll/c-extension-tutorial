@@ -38,6 +38,11 @@ queue_new(PyTypeObject* cls, PyObject* args, PyObject* kwargs)
         return NULL;
     }
 
+    /* normalize "unlimited" to -1 */
+    if (maxsize < 0) {
+        maxsize = -1;
+    }
+
     /* store the maxsize on the instance */
     self->q_maxsize = maxsize;
 
@@ -99,8 +104,6 @@ queue_repr(queue* self)
                                     PyList_GET_SIZE(self->q_elements));
     }
 
-    /* repr when we have a finite size which looks like: '<queue.Queue: 4/5>'
-       with 4 elements in the queue and maxsize=5 */
     return PyUnicode_FromFormat("<%s: %zd/%zd>",
                                 Py_TYPE(self)->tp_name,
                                 PyList_GET_SIZE(self->q_elements),
@@ -110,15 +113,49 @@ queue_repr(queue* self)
 static PyObject*
 queue_push(queue* self, PyObject* args, PyObject* kwargs)
 {
-    PyErr_SetString(PyExc_NotImplementedError, "you need to implement push");
-    return NULL;
+    static char* keywords[] = {"element", NULL};
+    PyObject* element;
+
+    if (self->q_maxsize > 0 &&
+        PyList_GET_SIZE(self->q_elements) == self->q_maxsize) {
+        PyErr_SetString(PyExc_ValueError, "full");
+        return NULL;
+    }
+
+    if (!PyArg_ParseTupleAndKeywords(args,
+                                     kwargs,
+                                     "O:push",
+                                     keywords,
+                                     &element)) {
+        return NULL;
+    }
+
+    if (PyList_Append(self->q_elements, element)) {
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
 }
 
 static PyObject*
 queue_pop(queue* self)
 {
-    PyErr_SetString(PyExc_NotImplementedError, "you need to implement pop");
-    return NULL;
+    PyObject* element;
+
+    if (!PyList_GET_SIZE(self->q_elements)) {
+        PyErr_SetString(PyExc_ValueError, "empty");
+        return NULL;
+    }
+
+    element = PyList_GET_ITEM(self->q_elements, 0);
+    Py_INCREF(element);
+
+    if (PyList_SetSlice(self->q_elements, 0, 1, NULL)) {
+        Py_DECREF(element);
+        return NULL;
+    }
+
+    return element;
 }
 
 PyMethodDef queue_methods[] = {
@@ -127,18 +164,76 @@ PyMethodDef queue_methods[] = {
     {NULL},
 };
 
-/* PySequenceMethods layout for extra exercise */
+static Py_ssize_t
+queue_size(queue* self)
+{
+    return PyList_GET_SIZE(self->q_elements);
+}
+
+static PyObject*
+queue_item(queue* self, Py_ssize_t ix)
+{
+    PyObject* element = PyList_GetItem(self->q_elements, ix);
+    Py_XINCREF(element);
+    return element;
+}
+
+static int
+queue_contains(queue* self, PyObject* element)
+{
+    return PySequence_Contains(self->q_elements, element);
+}
+
 PySequenceMethods queue_as_sequence = {
-    0,                                          /* sq_length */
+    (lenfunc) queue_size,                       /* sq_length */
     0,                                          /* sq_concat */
     0,                                          /* sq_repeat */
-    0,                                          /* sq_item */
+    (ssizeargfunc) queue_item,                  /* sq_item */
     0,                                          /* placeholder */
     0,                                          /* sq_ass_item */
     0,                                          /* placeholder */
-    0,                                          /* sq_contains */
+    (objobjproc) queue_contains,                /* sq_contains */
     0,                                          /* sq_inplace_concat */
     0,                                          /* sq_inplace_repeat */
+};
+
+static PyObject*
+queue_get_maxsize(queue* self, void* context)
+{
+    return PyLong_FromSsize_t(self->q_maxsize);
+}
+
+static int
+queue_set_maxsize(queue* self, PyObject* value_ob, void* context)
+{
+    Py_ssize_t value = PyLong_AsSsize_t(value_ob);
+    if (PyErr_Occurred()) {
+        return -1;
+    }
+
+    /* normalize "unlimited" to -1 */
+    if (value < 0) {
+        self->q_maxsize = -1;
+        return 0;
+    }
+
+    if (value < PyList_GET_SIZE(self->q_elements)) {
+        PyErr_SetString(PyExc_ValueError,
+                        "cannot drop the maxsize below the current size");
+        return 1;
+    }
+
+    self->q_maxsize = value;
+    return 0;
+}
+
+PyGetSetDef queue_getset[] = {
+    {"maxsize",
+     (getter) queue_get_maxsize,
+     (setter) queue_set_maxsize,
+     NULL,
+     NULL},
+    {NULL},
 };
 
 PyDoc_STRVAR(queue_doc, "A simple queue.");
@@ -155,7 +250,7 @@ static PyTypeObject queue_type = {
     0,                                          /* tp_reserved */
     (reprfunc) queue_repr,                      /* tp_repr */
     0,                                          /* tp_as_number */
-    0,                                          /* tp_as_sequence */
+    &queue_as_sequence,                         /* tp_as_sequence */
     0,                                          /* tp_as_mapping */
     0,                                          /* tp_hash */
     0,                                          /* tp_call */
@@ -174,7 +269,7 @@ static PyTypeObject queue_type = {
     0,                                          /* tp_iternext */
     queue_methods,                              /* tp_methods */
     0,                                          /* tp_members */
-    0,                                          /* tp_getset */
+    queue_getset,                               /* tp_getset */
     0,                                          /* tp_base */
     0,                                          /* tp_dict */
     0,                                          /* tp_descr_get */

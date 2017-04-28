@@ -23,6 +23,22 @@ A borrowed reference is a :c:type:`PyObject*` which is not owned. Users should
 reference can become a :ref:`new reference <new-reference>` by calling
 :c:func:`Py_INCREF` on the it.
 
+.. _reference-stealing:
+
+Reference Stealing
+~~~~~~~~~~~~~~~~~~
+
+Some functions will "steal" a reference to an argument. This means the function
+will assume ownership of the reference that has been given to it. Callers should
+*not* call :c:func:`Py_DECREF` the object after the reference has been
+stolen. If you need to keep your own reference to the object after it has been
+stolen you need to call :c:func:`Py_INCREF` **before** the reference is stolen.
+
+An example of this pattern is :c:func:`PyList_SetItem`. This function steals a
+reference to the ``value`` argument. This is to make it easier to allocate new
+objects and put them right into a :c:type:`PyListObject` without needing extra
+calls to :c:func:`Py_INCREF`.
+
 Reference Counting
 ------------------
 
@@ -1154,9 +1170,9 @@ Support Types
 
    https://docs.python.org/3/c-api/long.html
 
-   ``PyLongObject`` is the structure which holds Python :c:type:`int`
+   ``PyLongObject`` is the structure which holds Python :class:`int`
    objects. This is called a ``PyLongObject`` as a hold over from when arbitrary
-   width integer was called a :c:type:`long` object in Python 2.
+   width integer was called a ``long`` object in Python 2.
 
 Casting Rules
 `````````````
@@ -1164,8 +1180,198 @@ Casting Rules
 A ``PyLongObject*`` can safely be cast to a :c:type:`PyObject*`.
 
 :c:type:`PyObject*`\s can be cast to ``PyLongObject*``\s only after a
-``PyLong_Check``.
+:c:func:`PyLong_Check`.
 
+API Functions
+`````````````
+
+.. c:function:: int PyLong_Check(PyObject* ob)
+
+   Check if the instance is a :c:type:`PyLongObject`.
+
+   :param PyObject* ob: The object to check.
+   :return: True if ``ob`` is an instance of :c:type:`PyLongObject` or an
+            instance of a subclass of :c:type:`PyLongObject`.
+
+.. c:function:: unsigned long PyLong_AsUnsignedLong(PyObject* ob)
+
+   Convert a ``PyObject*`` of type :c:type:`PyLongObject*` to an ``unsigned
+   long``. If ``ob`` is not a :c:type:`long` object, an exception is raised.
+
+   :param PyObject* ob: The object to convert.
+   :return: ``ob`` as an :c:type:`unsigned long`.
+
+.. c:function:: PyObject* PyLong_FromUnsignedLong(unsigned long l)
+
+   Convert an :c:type:`unsigned long` into a :c:type:`PyObject*`. If the object
+   cannot be allocated an exception is raised.
+
+   :param l: The unsigned long to convert to a pyobjectptr.
+   :return: A :ref:`new reference <new-reference>` to ``l`` as a Python
+            object.
+
+``PyListObject``
+~~~~~~~~~~~~~~~~
+
+.. c:type:: PyListObject
+
+   https://docs.python.org/3/c-api/list.html
+
+   ``PyListObject`` is the structure which holds Python :class:`list` objects.
+
+Casting Rules
+`````````````
+
+A ``PyListObject*`` can safely be cast to a :c:type:`PyObject*`.
+
+:c:type:`PyObject*`\s can be cast to ``PyListObject*``\s only after a
+:c:func:`PyList_Check`.
+
+API Functions
+`````````````
+
+.. c:function:: int PyList_Check(PyObject* ob)
+
+   Check if the instance is a :c:type:`PyListObject`.
+
+   :param PyObject* ob: The object to check.
+   :return: True if ``ob`` is an instance of :c:type:`PyListObject` or an
+            instance of a subclass of :c:type:`PyListObject`.
+
+.. c:function:: PyObject* PyList_New(Py_ssize_t len)
+
+   Create a new list object of length ``len``. The members are set to
+   :c:data:`NULL` and need to be filled with :c:func:`PyList_SET_ITEM` before
+   returning the list to Python.
+
+   :param Py_ssize_t len: The length of the list to create.
+   :return: A :ref:`new reference <new-reference>` to a
+            :c:type:`PyListObject`. The elements must be filled in.
+
+.. c:function:: Py_ssize_t PyList_Size(PyObject* list)
+
+   Return the length of the list with error checking.
+
+   :param PyObject* list: The list to get the size of.
+   :return: The size of the list or -1 with an exception set if an error
+            occurred. If ``list`` is not actually a :c:type:`PyListObject` an
+            error will be raised.
+
+.. c:function:: Py_ssize_t PyList_GET_SIZE(PyObject* list)
+
+   Return the length of the list **without** error checking.
+
+   :param PyObject* list: The list to get the size of.
+   :return: The size of the list. This function **cannot** be called on objects
+            that are not known to be :c:type:`PyListObject`\s.
+
+.. c:function:: PyObject* PyList_GetItem(PyObject* list, Py_ssize_t ix)
+
+   Lookup an item in a list with error checking.
+
+   :param PyObject* list: The list to get an element in.
+   :param Py_ssize_t ix: The index to lookup. Negative indices are not
+                         supported.
+   :return: A :ref:`borrowed reference <borrowed-reference>` to the element at
+            index ``ix`` or :c:data:`NULL` with an :c:data:`PyExc_IndexError`
+            set if ``ix`` is out of bounds.
+
+.. c:function:: PyObject* PyList_GET_ITEM(PyObject* list, Py_ssize_t ix)
+
+   Lookup an item in a list **without** error checking.
+
+   :param PyObject* list: The list to get an element in.
+   :param Py_ssize_t ix: The index to lookup. Negative indices are not
+                         supported.
+   :return: A :ref:`borrowed reference <borrowed-reference>` to the element at
+            index ``ix``. It is undefined behavior if ``ix`` is out of bounds
+            for ``list``.
+
+.. c:function:: int PyList_SetItem(PyObject* list, Py_ssize_t ix, PyObject* value)
+
+   Assign an item in a list.
+
+   :param PyObject* list: The list to set the element in.
+   :param Py_ssize_t ix: The index to assign to. Negative indices are not
+                         supported.
+   :param PyObject* value: The value to assign. This reference is :ref:`stolen
+                           <reference-stealing>`. The old reference at ``ix``
+                           will be released.
+   :return: False on success or True with an exception set if an error occurred.
+
+.. c:function:: void PyList_SET_ITEM(PyObject* list, Py_ssize_t ix)
+
+   Lookup an item in a list **without** error checking.
+
+   :param PyObject* list: The list to set the element in.
+   :param Py_ssize_t ix: The index to assign to. Negative indices are not
+                         supported. ``ix`` must be in bounds for ``list``.
+   :param PyObject* value: The value to assign. This reference is :ref:`stolen
+                           <reference-stealing>`. The old reference at ``ix``
+                           will be **not** released and will be leaked if not
+                           :c:data:`NULL`.
+
+.. c:function:: int PyList_Insert(PyObject* list, Py_ssize_t ix, PyObject* item)
+
+   The C API equivalent of :meth:`list.insert`. Inserts ``item`` into ``list``
+   before ``ix``.
+
+   :param PyObject* list: The list to insert into.
+   :param Py_ssize_t ix: The index to insert before.
+   :param PyObject* item: The item to insert.
+   :return: False on success or True with an exception set if an error occurred.
+
+.. c:function:: int PyList_Append(PyObject* list, PyObject* item)
+
+   The C API equivalent of :meth:`list.append`. Append ``item`` to the end of
+   ``list``.
+
+   :param PyObject* list: The list to append to.
+   :param PyObject* item: The item to append to ``list``.
+   :return: False on success or True with an exception set if an error occurred.
+
+.. c:function:: PyObject* PyList_GetSlice(PyObject* list, Py_ssize_t start, Py_ssize_t stop)
+
+   Get the sub-list from ``start`` to ``stop``. This is like the Python
+   expression: ``list[start:stop]``.
+
+   :param PyObject* list: The list to slice.
+   :param Py_ssize_t start: The start index of the slice. Negative indices are
+                            not supported.
+   :param Py_ssize_t stop: The stop index of the slice. Negative indices are not
+                           supported.
+   :return: A :ref:`new reference <new-reference>` to ``list[start:stop]``
+            or NULL with an exception set if an error occurred.
+
+.. c:function:: int PyList_SetSlice(PyObject* list, Py_ssize_t start, Py_ssize_t stop, PyObject* itemlist)
+
+   Set the sub-list from ``start`` to ``stop``. This is like the Python
+   statement: ``list[start:stop] = itemlist`` or ``del list[start:stop]`` if
+   ``itemlist=NULL``.
+
+   :param PyObject* list: The list to set the slice of.
+   :param Py_ssize_t start: The start index of the slice. Negative indices are
+                            not supported.
+   :param Py_ssize_t stop: The stop index of the slice. Negative indices are not
+                           supported.
+   :param PyObject* itemlist: A list of items to assign to the slice. If
+                              ``itemlist`` is :c:data:`NULL`, this will delete
+                              the slice from the list.
+   :return: False on success or True with an exception set if an error occurred.
+
+.. c:function:: int PyList_Sort(PyObject* list)
+
+   The C API equivalent of :meth:`list.sort`. Sorts ``list`` in place.
+
+   :param PyObject* list: The list to sort.
+   :return: False on success or True with an exception set if an error occurred.
+
+.. c:function:: int PyList_Reverse(PyObject* list)
+
+   The C API equivalent of :meth:`list.reverse`. Reverses a list in place.
+
+   :param PyObject* list: The list to reverse.
+   :return: False on success or True with an exception set if an error occurred.
 
 ``PyMethodDef``
 ~~~~~~~~~~~~~~~
@@ -1405,29 +1611,6 @@ CPython Functions and Macros
       #define PyDoc_STRVAR(name, str) PyDoc_VAR(name) = PyDoc_STR(str)
       #endif
 
-``PyLong_AsUnsignedLong``
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. c:function:: unsigned long PyLong_AsUnsignedLong(PyObject* ob)
-
-   Convert a ``PyObject*`` of type :c:type:`PyLongObject*` to an ``unsigned
-   long``. If ``ob`` is not a :c:type:`long` object, an exception is raised.
-
-   :param PyObject* ob: The object to convert.
-   :return: ``ob`` as an :c:type:`unsigned long`.
-
-``PyLong_FromUnsignedLong``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. c:function:: PyObject* PyLong_FromUnsignedLong(unsigned long l)
-
-   Convert an :c:type:`unsigned long` into a :c:type:`PyObject*`. If the object cannot
-   be allocated an exception is raised.
-
-   :param l: The unsigned long to convert to a pyobjectptr.
-   :return: a :ref:`new reference <new-reference>` to ``l`` as a Python
-            object.
-
 ``PyModule_Create``
 ~~~~~~~~~~~~~~~~~~~
 
@@ -1437,7 +1620,7 @@ CPython Functions and Macros
 
 ``PyType_Ready``
 
-.. c:function:: int PyType_Read(PyTypeObject* type)
+.. c:function:: int PyType_Ready(PyTypeObject* type)
 
    Ready a type by copying all of the slots down from the base class. This
    function should be called from the :c:macro:`PyMODINIT_FUNC`.

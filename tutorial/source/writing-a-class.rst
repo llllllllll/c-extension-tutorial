@@ -71,9 +71,9 @@ Instance Data
 
 Using the type's slots or dictionary we can register methods for a given type,
 but the data needs to be stored on the instance itself. When defining a new
-class, we start by defining the struct to represent an instance of the
-class. This struct needs to start with a :c:type:`PyObject` field (note: not a
-pointer, a :c:type:`PyObject` by *value*) which holds a pointer to our type and
+class, we define the struct to represent an instance of the class. This struct
+needs to start with a :c:type:`PyObject` field (note: not a pointer, a
+:c:type:`PyObject` by *value*) which holds a pointer to our type and
 :ref:`reference count <ref-count>`. Starting our struct with a
 :c:type:`PyObject` makes it safe to cast to and from :c:type:`PyObject*` because
 a pointer to a struct is equivalent to a pointer to its first member according
@@ -154,9 +154,12 @@ Defining a :c:type:`PyTypeObject`
 ---------------------------------
 
 Now that we understand a bit about the layout of types and instances, let's see
-what a new type definition looks like:
+what a new type definition looks like. Below we define a class ``Queue`` with
+two members: ``Py_ssize_t q_maxsize`` and ``PyObject* q_elements``. The
+``q_maxsize`` is the maximum number of elements in the queue, and ``q_elements``
+are the elements in the queue as Python :class:`list`.
 
-.. code-block::
+.. code-block:: c
 
    typedef struct {
         PyObject q_base;       /* storage for our type and reference count */
@@ -168,7 +171,7 @@ what a new type definition looks like:
 
    static PyTypeObject queue_type = {
         PyVarObject_HEAD_INIT(&PyType_Type, 0)
-        "queue.queue.Queue",                        /* tp_name */
+        "queue.Queue",                              /* tp_name */
         sizeof(queue),                              /* tp_basicsize */
         0,                                          /* tp_itemsize */
         (destructor) queue_dealloc,                 /* tp_dealloc */
@@ -231,7 +234,7 @@ function.
 This type also has some custom methods so we need to pass an array to
 :c:member:`PyTypeObject.tp_methods`.
 
-Finally, we need to initialize our new objects so we have a
+Finally, we need to construct our new objects so we have a
 :c:member:`PyTypeObject.tp_new` function set.
 
 .. note::
@@ -256,3 +259,15 @@ stored in the :c:member:`PyTypeObject.tp_dict`.
 
 To ready a type, call :c:func:`PyType_Ready` in the :c:macro:`PyMODINIT_FUNC`
 for the module defining the class.
+
+Implement ``Queue.push`` and ``Queue.pop``
+------------------------------------------
+
+As an exercise, implementat for ``Queue.push`` and ``Queue.pop``. Try to
+implement these functions using the :c:type:`PyListObject` API functions.
+
+Use :c:func:`PyArg_ParseTupleAndKeywords` to accept arguments for
+``Queue.push``. ``Queue.pop`` should use :c:macro:`METH_NOARGS` and just accept
+``self``.
+
+Remember to check for exceptions after calling API functions.
