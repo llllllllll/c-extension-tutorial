@@ -75,7 +75,7 @@ PyDoc_STRVAR(fib_module_doc, "provides a Fibonacci function");
 
 PyModuleDef fib_module = {
     PyModuleDef_HEAD_INIT,
-    "fib",
+    "fib.fib",
     fib_module_doc,
     -1,
     methods,

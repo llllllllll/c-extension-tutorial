@@ -1435,6 +1435,16 @@ CPython Functions and Macros
 
    Create a new Python module object from a :c:type:`PyModuleDef*`.
 
+``PyType_Ready``
+
+.. c:function:: int PyType_Read(PyTypeObject* type)
+
+   Ready a type by copying all of the slots down from the base class. This
+   function should be called from the :c:macro:`PyMODINIT_FUNC`.
+
+   :param PyTypeObject* type: The type to ready.
+   :return: True with an exception set if an error occurred, otherwise False.
+
 ``PyObject_Repr``
 ~~~~~~~~~~~~~~~~~
 
@@ -1652,11 +1662,17 @@ Accept an :c:type:`int` argument as a :c:type:`short`. A reference to a
 Accept an :c:type:`int` argument as an :c:type:`int`. A reference to an
 :c:type:`int` should appear in the variadic argument list at this index.
 
-``i`` (int) [long]
+``l`` (int) [long]
 ''''''''''''''''''
 
 Accept an :c:type:`int` argument as a :c:type:`long`. A reference to a
 :c:type:`long` should appear in the variadic argument list at this index.
+
+``n`` (int) [Py_ssize_t]
+''''''''''''''''''''''''
+
+Accept an :c:type:`int` argument as a :c:type:`Py_ssize_t`. A reference to a
+:c:type:`Py_ssize_t` should appear in the variadic argument list at this index.
 
 ``C`` (str of length 1) [int]
 '''''''''''''''''''''''''''''
