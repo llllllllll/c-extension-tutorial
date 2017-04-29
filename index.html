@@ -95,6 +95,9 @@
 <li class="toctree-l1"><a class="reference internal" href="abstract-api.html">Abstract Object API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fancy-argument-parsing.html">Fancy Argument Parsing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="writing-a-class.html">Writing a New Class in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common-issues.html">Common Issues and Bugs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gdb.html">Debugging with GDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="member-vs-getset.html"><code class="docutils literal"><span class="pre">PyMemberDef</span></code> vs <code class="docutils literal"><span class="pre">PyGetSetDef</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
 </ul>
 
@@ -195,11 +198,6 @@ using the same version of CPython with the same compile time flags.</p>
 </div>
 <div class="section" id="viewing-the-tutorial">
 <h2>Viewing the Tutorial<a class="headerlink" href="#viewing-the-tutorial" title="Permalink to this headline">¶</a></h2>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">The tutorial content is not complete! The install instructions above are
-valid but the content is not complete yet so don&#8217;t read ahead!</p>
-</div>
 <p>The tutorial is structured as a sphinx project. This allows the tutorial to be
 viewed from a standard browser or hosted online.</p>
 <p>The material can be viewed in a browser by opening
@@ -261,6 +259,26 @@ viewed from a standard browser or hosted online.</p>
 <li class="toctree-l2"><a class="reference internal" href="writing-a-class.html#defining-a-pytypeobject">Defining a <code class="docutils literal"><span class="pre">PyTypeObject</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="writing-a-class.html#readying-a-type">Readying a Type</a></li>
 <li class="toctree-l2"><a class="reference internal" href="writing-a-class.html#implement-queue-push-and-queue-pop">Implement <code class="docutils literal"><span class="pre">Queue.push</span></code> and <code class="docutils literal"><span class="pre">Queue.pop</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="common-issues.html">Common Issues and Bugs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="common-issues.html#reference-counting-issues">Reference Counting Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gdb.html">Debugging with GDB</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gdb.html#debugging-enabled-python">Debugging Enabled Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gdb.html#general">General</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gdb.html#setting-a-breakpoint">Setting a Breakpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gdb.html#running-the-program">Running the Program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gdb.html#interacting-with-the-program">Interacting with the Program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gdb.html#interacting-with-cpython">Interacting with CPython</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gdb.html#fix-queue-rotate">Fix <code class="docutils literal"><span class="pre">Queue.rotate</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="member-vs-getset.html"><code class="docutils literal"><span class="pre">PyMemberDef</span></code> vs <code class="docutils literal"><span class="pre">PyGetSetDef</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="member-vs-getset.html#pymemberdef"><code class="docutils literal"><span class="pre">PyMemberDef</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="member-vs-getset.html#pygetsetdef"><code class="docutils literal"><span class="pre">PyGetSetDef</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="member-vs-getset.html#expose-q-maxsize-to-python">Expose <code class="docutils literal"><span class="pre">q_maxsize</span></code> to Python</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a><ul>

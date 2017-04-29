@@ -263,7 +263,7 @@ for the module defining the class.
 Implement ``Queue.push`` and ``Queue.pop``
 ------------------------------------------
 
-As an exercise, implementat for ``Queue.push`` and ``Queue.pop``. Try to
+As an exercise, implement for ``Queue.push`` and ``Queue.pop``. Try to
 implement these functions using the :c:type:`PyListObject` API functions.
 
 Use :c:func:`PyArg_ParseTupleAndKeywords` to accept arguments for

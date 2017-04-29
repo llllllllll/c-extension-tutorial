@@ -36,7 +36,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="c-extension-tutorial  documentation" href="index.html"/>
-        <link rel="prev" title="Writing a New Class in C" href="writing-a-class.html"/> 
+        <link rel="prev" title="PyMemberDef vs PyGetSetDef" href="member-vs-getset.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -95,6 +95,9 @@
 <li class="toctree-l1"><a class="reference internal" href="abstract-api.html">Abstract Object API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fancy-argument-parsing.html">Fancy Argument Parsing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="writing-a-class.html">Writing a New Class in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common-issues.html">Common Issues and Bugs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gdb.html">Debugging with GDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="member-vs-getset.html"><code class="docutils literal"><span class="pre">PyMemberDef</span></code> vs <code class="docutils literal"><span class="pre">PyGetSetDef</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Appendix</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#glossary">Glossary</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#new-reference">New Reference</a></li>
@@ -136,12 +139,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymodinit-func"><code class="docutils literal"><span class="pre">PyMODINIT_FUNC</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#global-sentinels">Global Sentinels</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#py-none"><code class="docutils literal"><span class="pre">Py_None</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#py-true"><code class="docutils literal"><span class="pre">Py_True</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#py-false"><code class="docutils literal"><span class="pre">Py_False</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#global-sentinels">Global Sentinels</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cpython-functions-and-macros">CPython Functions and Macros</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#py-refcnt"><code class="docutils literal"><span class="pre">Py_REFCNT</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#py-type"><code class="docutils literal"><span class="pre">Py_TYPE</span></code></a></li>
@@ -241,7 +239,7 @@ needed.</p>
 <div class="section" id="borrowed-reference">
 <span id="id2"></span><h3>Borrowed Reference<a class="headerlink" href="#borrowed-reference" title="Permalink to this headline">¶</a></h3>
 <p>A borrowed reference is a <a class="reference internal" href="#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> which is not owned. Users should
-<em>not</em> call <a class="reference internal" href="#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal"><span class="pre">Py_DECREF()</span></code></a> when they are done with this object. A borrowed
+<strong>not</strong> call <a class="reference internal" href="#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal"><span class="pre">Py_DECREF()</span></code></a> when they are done with this object. A borrowed
 reference can become a <a class="reference internal" href="#new-reference"><span class="std std-ref">new reference</span></a> by calling
 <a class="reference internal" href="#c.Py_INCREF" title="Py_INCREF"><code class="xref c c-func docutils literal"><span class="pre">Py_INCREF()</span></code></a> on the it.</p>
 </div>
@@ -249,7 +247,7 @@ reference can become a <a class="reference internal" href="#new-reference"><span
 <span id="id3"></span><h3>Reference Stealing<a class="headerlink" href="#reference-stealing" title="Permalink to this headline">¶</a></h3>
 <p>Some functions will &#8220;steal&#8221; a reference to an argument. This means the function
 will assume ownership of the reference that has been given to it. Callers should
-<em>not</em> call <a class="reference internal" href="#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal"><span class="pre">Py_DECREF()</span></code></a> the object after the reference has been
+<strong>not</strong> call <a class="reference internal" href="#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal"><span class="pre">Py_DECREF()</span></code></a> the object after the reference has been
 stolen. If you need to keep your own reference to the object after it has been
 stolen you need to call <a class="reference internal" href="#c.Py_INCREF" title="Py_INCREF"><code class="xref c c-func docutils literal"><span class="pre">Py_INCREF()</span></code></a> <strong>before</strong> the reference is stolen.</p>
 <p>An example of this pattern is <a class="reference internal" href="#c.PyList_SetItem" title="PyList_SetItem"><code class="xref c c-func docutils literal"><span class="pre">PyList_SetItem()</span></code></a>. This function steals a
@@ -262,7 +260,7 @@ calls to <a class="reference internal" href="#c.Py_INCREF" title="Py_INCREF"><co
 <h2>Reference Counting<a class="headerlink" href="#reference-counting" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="reference-count">
 <span id="ref-count"></span><h3>Reference Count<a class="headerlink" href="#reference-count" title="Permalink to this headline">¶</a></h3>
-<p>The number of refererants of a given object. This is the count of objects which
+<p>The number of references to a given object. This is the count of objects which
 refer to the given object.</p>
 <p>When an object is created, its reference count starts at one, which is the
 reference owned by the creator. The reference count can be increased with
@@ -941,16 +939,14 @@ offset will be used as the <a class="reference internal" href="#c.PyTypeObject.t
 <p>Below we have a weakly referenceable type:</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">PyObject</span> <span class="n">wr_base</span><span class="p">;</span>
-    <span class="n">PyObject</span><span class="o">*</span> <span class="n">wr_weaklist</span><span class="p">;</span>
-    <span class="cm">/* other data if we want */</span>
+<span class="hll">    <span class="n">PyObject</span><span class="o">*</span> <span class="n">wr_weaklist</span><span class="p">;</span>
+</span>    <span class="cm">/* other data if we want */</span>
 <span class="p">}</span> <span class="n">mytype</span><span class="p">;</span>
 
 <span class="n">PyTypeObject</span> <span class="n">mytype_type</span> <span class="o">=</span> <span class="p">{</span>
     <span class="cm">/* ... */</span>
-
-    <span class="n">offsetof</span><span class="p">(</span><span class="n">mytype</span><span class="p">,</span> <span class="n">wr_weaklist</span><span class="p">),</span>  <span class="cm">/* tp_weaklistoffset */</span>
-
-    <span class="cm">/* ... */</span>
+<span class="hll">    <span class="n">offsetof</span><span class="p">(</span><span class="n">mytype</span><span class="p">,</span> <span class="n">wr_weaklist</span><span class="p">),</span>  <span class="cm">/* tp_weaklistoffset */</span>
+</span>    <span class="cm">/* ... */</span>
 <span class="p">};</span>
 </pre></div>
 </div>
@@ -985,8 +981,8 @@ Python with <code class="docutils literal"><span class="pre">__getitem__</span><
 <dt id="c.PyTypeObject.tp_iternext">
 iternextfunc <code class="descname">PyTypeObject.tp_iternext</code><a class="headerlink" href="#c.PyTypeObject.tp_iternext" title="Permalink to this definition">¶</a></dt>
 <dd><p>The C API equivalent of <code class="docutils literal"><span class="pre">__next__</span></code>. The core difference is that
-<code class="xref c c-data docutils literal"><span class="pre">PyExc_StopIteration</span></code> does <em>not</em> need to be set when the iterator is
-exhausted. This will be done before returning to Python but the exception
+<code class="xref c c-data docutils literal"><span class="pre">PyExc_StopIteration</span></code> does <strong>not</strong> need to be set when the iterator
+is exhausted. This will be done before returning to Python but the exception
 overhead can be avoided when being called from C.</p>
 <p>If this slot is set, <a class="reference internal" href="#c.PyTypeObject.tp_iter" title="PyTypeObject.tp_iter"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_iter</span></code></a> should be a function
 which returns a <a class="reference internal" href="#new-reference"><span class="std std-ref">new reference</span></a> to <code class="docutils literal"><span class="pre">self</span></code>.</p>
@@ -1316,16 +1312,14 @@ to 0 which indicates that we do not have a <code class="docutils literal"><span 
 <p>Below we have a type with a <code class="docutils literal"><span class="pre">__dict__</span></code>:</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">PyObject</span> <span class="n">wd_base</span><span class="p">;</span>
-    <span class="n">PyObject</span><span class="o">*</span> <span class="n">wd_dict</span><span class="p">;</span>
-    <span class="cm">/* other data if we want */</span>
+<span class="hll">    <span class="n">PyObject</span><span class="o">*</span> <span class="n">wd_dict</span><span class="p">;</span>
+</span>    <span class="cm">/* other data if we want */</span>
 <span class="p">}</span> <span class="n">mytype</span><span class="p">;</span>
 
 <span class="n">PyTypeObject</span> <span class="n">mytype_type</span> <span class="o">=</span> <span class="p">{</span>
     <span class="cm">/* ... */</span>
-
-    <span class="n">offsetof</span><span class="p">(</span><span class="n">mytype</span><span class="p">,</span> <span class="n">wd_dict</span><span class="p">),</span>  <span class="cm">/* tp_dictoffset */</span>
-
-    <span class="cm">/* ... */</span>
+<span class="hll">    <span class="n">offsetof</span><span class="p">(</span><span class="n">mytype</span><span class="p">,</span> <span class="n">wd_dict</span><span class="p">),</span>  <span class="cm">/* tp_dictoffset */</span>
+</span>    <span class="cm">/* ... */</span>
 <span class="p">};</span>
 </pre></div>
 </div>
@@ -2245,14 +2239,10 @@ the module.</p>
 </div>
 <div class="section" id="global-sentinels">
 <h2>Global Sentinels<a class="headerlink" href="#global-sentinels" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="py-none">
-<h3><code class="docutils literal"><span class="pre">Py_None</span></code><a class="headerlink" href="#py-none" title="Permalink to this headline">¶</a></h3>
 <dl class="var">
 <dt id="c.Py_None">
 <a class="reference internal" href="#c.PyObject" title="PyObject">PyObject</a>* <code class="descname">Py_None</code><a class="headerlink" href="#c.Py_None" title="Permalink to this definition">¶</a></dt>
 <dd><p>A global reference to <code class="docutils literal"><span class="pre">None</span></code>.</p>
-</dd></dl>
-
 <dl class="macro">
 <dt id="c.Py_RETURN_NONE">
 <code class="descname">Py_RETURN_NONE</code><a class="headerlink" href="#c.Py_RETURN_NONE" title="Permalink to this definition">¶</a></dt>
@@ -2262,28 +2252,50 @@ the module.</p>
 </pre></div>
 </div>
 <p>This is useful because people often forget that they need to call
-<a class="reference internal" href="#c.Py_INCREF" title="Py_INCREF"><code class="xref c c-func docutils literal"><span class="pre">Py_INCREF()</span></code></a> on <a class="reference internal" href="#c.Py_None" title="Py_None"><code class="xref c c-data docutils literal"><span class="pre">Py_None</span></code></a> even though it is a global object.</p>
+<a class="reference internal" href="#c.Py_INCREF" title="Py_INCREF"><code class="xref c c-func docutils literal"><span class="pre">Py_INCREF()</span></code></a> on <a class="reference internal" href="#c.Py_None" title="Py_None"><code class="xref c c-data docutils literal"><span class="pre">Py_None</span></code></a> even though it is a global
+object.</p>
 </dd></dl>
 
-</div>
-<div class="section" id="py-true">
-<h3><code class="docutils literal"><span class="pre">Py_True</span></code><a class="headerlink" href="#py-true" title="Permalink to this headline">¶</a></h3>
+</dd></dl>
+
 <dl class="var">
 <dt id="c.Py_True">
 <a class="reference internal" href="#c.PyObject" title="PyObject">PyObject</a>* <code class="descname">Py_True</code><a class="headerlink" href="#c.Py_True" title="Permalink to this definition">¶</a></dt>
 <dd><p>A global reference to <code class="docutils literal"><span class="pre">True</span></code>.</p>
+<dl class="macro">
+<dt id="c.Py_RETURN_TRUE">
+<code class="descname">Py_RETURN_TRUE</code><a class="headerlink" href="#c.Py_RETURN_TRUE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shorthand for:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">Py_INCREF</span><span class="p">(</span><span class="n">Py_True</span><span class="p">);</span>
+<span class="k">return</span> <span class="n">Py_True</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This is useful because people often forget that they need to call
+<a class="reference internal" href="#c.Py_INCREF" title="Py_INCREF"><code class="xref c c-func docutils literal"><span class="pre">Py_INCREF()</span></code></a> on <a class="reference internal" href="#c.Py_True" title="Py_True"><code class="xref c c-data docutils literal"><span class="pre">Py_True</span></code></a> even though it is a global
+object.</p>
 </dd></dl>
 
-</div>
-<div class="section" id="py-false">
-<h3><code class="docutils literal"><span class="pre">Py_False</span></code><a class="headerlink" href="#py-false" title="Permalink to this headline">¶</a></h3>
+</dd></dl>
+
 <dl class="var">
 <dt id="c.Py_False">
 <a class="reference internal" href="#c.PyObject" title="PyObject">PyObject</a>* <code class="descname">Py_False</code><a class="headerlink" href="#c.Py_False" title="Permalink to this definition">¶</a></dt>
 <dd><p>A global reference to <code class="docutils literal"><span class="pre">False</span></code>.</p>
+<dl class="macro">
+<dt id="c.Py_RETURN_FALSE">
+<code class="descname">Py_RETURN_FALSE</code><a class="headerlink" href="#c.Py_RETURN_FALSE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shorthand for:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">Py_INCREF</span><span class="p">(</span><span class="n">Py_False</span><span class="p">);</span>
+<span class="k">return</span> <span class="n">Py_False</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This is useful because people often forget that they need to call
+<a class="reference internal" href="#c.Py_INCREF" title="Py_INCREF"><code class="xref c c-func docutils literal"><span class="pre">Py_INCREF()</span></code></a> on <a class="reference internal" href="#c.Py_False" title="Py_False"><code class="xref c c-data docutils literal"><span class="pre">Py_False</span></code></a> even though it is a global
+object.</p>
 </dd></dl>
 
-</div>
+</dd></dl>
+
 </div>
 <div class="section" id="cpython-functions-and-macros">
 <h2>CPython Functions and Macros<a class="headerlink" href="#cpython-functions-and-macros" title="Permalink to this headline">¶</a></h2>
@@ -2741,9 +2753,10 @@ like accepting an object as <code class="docutils literal"><span class="pre">O</
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">The CPython docs mention converters for <code class="docutils literal"><span class="pre">unsigned</span></code> integral types which do
-<em>not</em> do overflow checking. These converters should not be used because they
-fail to handle negative integers. The proper way to handle these values is to
-accept them as <code class="docutils literal"><span class="pre">O</span></code> and use one of the <code class="docutils literal"><span class="pre">PyLong_As*</span></code> conversion functions.</p>
+<strong>not</strong> do overflow checking. These converters should not be used because
+they fail to handle negative integers. The proper way to handle these values
+is to accept them as <code class="docutils literal"><span class="pre">O</span></code> and use one of the <code class="docutils literal"><span class="pre">PyLong_As*</span></code> conversion
+functions.</p>
 </div>
 </div>
 </div>
@@ -3140,7 +3153,7 @@ checked with <a class="reference internal" href="#c.PyErr_Occurred" title="PyErr
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="writing-a-class.html" class="btn btn-neutral" title="Writing a New Class in C" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="member-vs-getset.html" class="btn btn-neutral" title="PyMemberDef vs PyGetSetDef" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

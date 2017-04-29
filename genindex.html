@@ -95,6 +95,9 @@
 <li class="toctree-l1"><a class="reference internal" href="abstract-api.html">Abstract Object API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fancy-argument-parsing.html">Fancy Argument Parsing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="writing-a-class.html">Writing a New Class in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common-issues.html">Common Issues and Bugs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gdb.html">Debugging with GDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="member-vs-getset.html"><code class="docutils literal"><span class="pre">PyMemberDef</span></code> vs <code class="docutils literal"><span class="pre">PyGetSetDef</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
 </ul>
 
@@ -315,7 +318,11 @@
 </li>
       <li><a href="appendix.html#c.Py_REFCNT">Py_REFCNT (C function)</a>
 </li>
+      <li><a href="appendix.html#c.Py_RETURN_FALSE">Py_RETURN_FALSE (C macro)</a>
+</li>
       <li><a href="appendix.html#c.Py_RETURN_NONE">Py_RETURN_NONE (C macro)</a>
+</li>
+      <li><a href="appendix.html#c.Py_RETURN_TRUE">Py_RETURN_TRUE (C macro)</a>
 </li>
       <li><a href="appendix.html#c.Py_ssize_t">Py_ssize_t (C type)</a>
 </li>
@@ -461,10 +468,10 @@
 </li>
       <li><a href="appendix.html#c.PyModuleDef.PyModuleDef.m_methods">PyModuleDef.PyModuleDef.m_methods (C member)</a>
 </li>
-      <li><a href="appendix.html#c.PyModuleDef.PyModuleDef.m_name">PyModuleDef.PyModuleDef.m_name (C member)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="appendix.html#c.PyModuleDef.PyModuleDef.m_name">PyModuleDef.PyModuleDef.m_name (C member)</a>
+</li>
       <li><a href="appendix.html#c.PyModuleDef.PyModuleDef.m_size">PyModuleDef.PyModuleDef.m_size (C member)</a>
 </li>
       <li><a href="appendix.html#c.PyModuleDef.PyModuleDef.m_slots">PyModuleDef.PyModuleDef.m_slots (C member)</a>

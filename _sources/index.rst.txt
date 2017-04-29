@@ -12,6 +12,9 @@
    abstract-api
    fancy-argument-parsing
    writing-a-class
+   common-issues
+   gdb
+   member-vs-getset
    appendix
 
 

@@ -36,7 +36,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="c-extension-tutorial  documentation" href="index.html"/>
-        <link rel="next" title="Appendix" href="appendix.html"/>
+        <link rel="next" title="Common Issues and Bugs" href="common-issues.html"/>
         <link rel="prev" title="Fancy Argument Parsing" href="fancy-argument-parsing.html"/> 
 
   
@@ -108,6 +108,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#implement-queue-push-and-queue-pop">Implement <code class="docutils literal"><span class="pre">Queue.push</span></code> and <code class="docutils literal"><span class="pre">Queue.pop</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="common-issues.html">Common Issues and Bugs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gdb.html">Debugging with GDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="member-vs-getset.html"><code class="docutils literal"><span class="pre">PyMemberDef</span></code> vs <code class="docutils literal"><span class="pre">PyGetSetDef</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
 </ul>
 
@@ -398,7 +401,7 @@ for the module defining the class.</p>
 </div>
 <div class="section" id="implement-queue-push-and-queue-pop">
 <h2>Implement <code class="docutils literal"><span class="pre">Queue.push</span></code> and <code class="docutils literal"><span class="pre">Queue.pop</span></code><a class="headerlink" href="#implement-queue-push-and-queue-pop" title="Permalink to this headline">¶</a></h2>
-<p>As an exercise, implementat for <code class="docutils literal"><span class="pre">Queue.push</span></code> and <code class="docutils literal"><span class="pre">Queue.pop</span></code>. Try to
+<p>As an exercise, implement for <code class="docutils literal"><span class="pre">Queue.push</span></code> and <code class="docutils literal"><span class="pre">Queue.pop</span></code>. Try to
 implement these functions using the <a class="reference internal" href="appendix.html#c.PyListObject" title="PyListObject"><code class="xref c c-type docutils literal"><span class="pre">PyListObject</span></code></a> API functions.</p>
 <p>Use <a class="reference internal" href="appendix.html#c.PyArg_ParseTupleAndKeywords" title="PyArg_ParseTupleAndKeywords"><code class="xref c c-func docutils literal"><span class="pre">PyArg_ParseTupleAndKeywords()</span></code></a> to accept arguments for
 <code class="docutils literal"><span class="pre">Queue.push</span></code>. <code class="docutils literal"><span class="pre">Queue.pop</span></code> should use <a class="reference internal" href="appendix.html#c.METH_NOARGS" title="METH_NOARGS"><code class="xref c c-macro docutils literal"><span class="pre">METH_NOARGS</span></code></a> and just accept
@@ -417,7 +420,7 @@ implement these functions using the <a class="reference internal" href="appendix
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="appendix.html" class="btn btn-neutral float-right" title="Appendix" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="common-issues.html" class="btn btn-neutral float-right" title="Common Issues and Bugs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="fancy-argument-parsing.html" class="btn btn-neutral" title="Fancy Argument Parsing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

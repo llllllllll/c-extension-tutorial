@@ -1,0 +1,322 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Common Issues and Bugs &mdash; c-extension-tutorial  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="c-extension-tutorial  documentation" href="index.html"/>
+        <link rel="next" title="Debugging with GDB" href="gdb.html"/>
+        <link rel="prev" title="Writing a New Class in C" href="writing-a-class.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> c-extension-tutorial
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="what-is-an-extension-module.html">What is an Extension Module?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="c-level-representation.html">C Level Representation of Python Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-function.html">Writing a New Function in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-and-importing.html">Building and Importing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error-handling.html">Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="abstract-api.html">Abstract Object API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fancy-argument-parsing.html">Fancy Argument Parsing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-class.html">Writing a New Class in C</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Common Issues and Bugs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#reference-counting-issues">Reference Counting Issues</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#reference-surplus-leak">Reference Surplus (Leak)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reference-deficit">Reference Deficit</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gdb.html">Debugging with GDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="member-vs-getset.html"><code class="docutils literal"><span class="pre">PyMemberDef</span></code> vs <code class="docutils literal"><span class="pre">PyGetSetDef</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">c-extension-tutorial</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Common Issues and Bugs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/common-issues.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="common-issues-and-bugs">
+<h1>Common Issues and Bugs<a class="headerlink" href="#common-issues-and-bugs" title="Permalink to this headline">¶</a></h1>
+<p>C is much less friendly than Python. Programmer errors often lead to undefined
+behavior and crashes. When writing C extensions it is important to look out for
+common issues that can cause hard to debug failures later.</p>
+<div class="section" id="reference-counting-issues">
+<h2>Reference Counting Issues<a class="headerlink" href="#reference-counting-issues" title="Permalink to this headline">¶</a></h2>
+<p>The most common and annoying issues in C extension modules are around
+<a class="reference internal" href="appendix.html#ref-count"><span class="std std-ref">reference counting</span></a>. CPython uses the <a class="reference internal" href="appendix.html#ref-count"><span class="std std-ref">reference count</span></a> of an object to know when to deallocate the object, when this gets
+out of sync we can have one of two kinds of problems: a reference surplus or a
+reference deficit.</p>
+<div class="section" id="reference-surplus-leak">
+<h3>Reference Surplus (Leak)<a class="headerlink" href="#reference-surplus-leak" title="Permalink to this headline">¶</a></h3>
+<p>A reference surplus is when an object believes it has more references than
+actually exist. This means that <a class="reference internal" href="appendix.html#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal"><span class="pre">Py_DECREF()</span></code></a> will not be called enough
+times to bring the reference <a class="reference internal" href="appendix.html#ref-count"><span class="std std-ref">reference count</span></a> back to zero and
+the object will never be deallocated. This is commonly referred to as a memory
+leak, reference leak, or leaking an object.</p>
+<p>An easy way for a leak to occur is when calling a function which returns a
+<a class="reference internal" href="appendix.html#new-reference"><span class="std std-ref">new reference</span></a>. The caller of the function is responsible
+for the newly returned reference, if they don&#8217;t explicitly give this reference
+away then the <strong>must</strong> call <a class="reference internal" href="appendix.html#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal"><span class="pre">Py_DECREF()</span></code></a> (or another reference
+decrementing function) on the object.</p>
+<p>Reference leaks are hard to detect in testing because, for most cases, the code
+appears to work as intended. These issues only become noticeable when the memory
+usage of your program grows unboundedly. A quick check you can do in a repl is
+call your function in an infinite loop. This should not cause the memory usage
+to grow after the interpreter has warmed up. Let the loop run for around a
+minute and if the memory usage grows with time you know the function must be
+leaking.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The inverse is not always true: if the memory usage doesn&#8217;t grow it might
+still be leaking references to shared objects.</p>
+</div>
+<p>Some objects in the interpreter are memoized but should still have an accurate
+reference count. For example: <a class="reference internal" href="appendix.html#c.PyLongObject" title="PyLongObject"><code class="xref c c-type docutils literal"><span class="pre">PyLongObject</span></code></a>s in the range [-5, 256]
+are memoized such that all instances of <code class="docutils literal"><span class="pre">0</span></code> are the same object in
+memory. This is also true for global sentinels like <a class="reference internal" href="appendix.html#c.Py_None" title="Py_None"><code class="xref c c-data docutils literal"><span class="pre">Py_None</span></code></a>,
+<a class="reference internal" href="appendix.html#c.Py_True" title="Py_True"><code class="xref c c-data docutils literal"><span class="pre">Py_True</span></code></a>, or <a class="reference internal" href="appendix.html#c.Py_False" title="Py_False"><code class="xref c c-data docutils literal"><span class="pre">Py_False</span></code></a>. If you leak a reference to one of
+these objects it is much harder to notice.</p>
+</div>
+<div class="section" id="reference-deficit">
+<h3>Reference Deficit<a class="headerlink" href="#reference-deficit" title="Permalink to this headline">¶</a></h3>
+<p>A reference deficit is when an object believes it has less references than
+actually exist. This means that <a class="reference internal" href="appendix.html#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal"><span class="pre">Py_DECREF()</span></code></a> will be called too many
+times and there may be a point where objects refer to a deallocated object which
+they believe they are keeping alive.</p>
+<p>An easy way for a reference deficit to occur is when calling a function that
+returns a <a class="reference internal" href="appendix.html#borrowed-reference"><span class="std std-ref">borrowed reference</span></a>. The caller of the
+function is not responsible for the reference, so if they call
+<a class="reference internal" href="appendix.html#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal"><span class="pre">Py_DECREF()</span></code></a> on it or give the reference away there will be one less
+reference than expected. Reference deficits often create &#8220;use after free&#8221; bugs
+where code tries to use the data stored in a <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> which has
+already been deallocated and now contains undefined data .</p>
+<p>Reference deficits have more &#8220;explosive&#8221; failure modes than reference leaks so
+it is harder to miss them. Often the failure mode of a reference deficit is that
+you will get a segmentation fault at interpreter exit or in the middle of a
+function. One bad thing about reference deficits is that the crash is often not
+in a related location to the actual problem because it occurs when someone uses
+the object after it has been deallocated.</p>
+<p>Unlike reference leaks there isn&#8217;t a quick repl test that I know of to check for
+these, the best bets is to walk through your functions in a <a class="reference internal" href="gdb.html#gdb"><span class="std std-ref">debugger</span></a> and verify that the reference counts of your objects are what you
+expect. It doesn&#8217;t hurt to add some assertions to codify your expectations for
+development builds.</p>
+<p>A special kind of reference deficit that is easy to miss is a deficit of a
+global sentinel like <a class="reference internal" href="appendix.html#c.Py_None" title="Py_None"><code class="xref c c-data docutils literal"><span class="pre">Py_None</span></code></a>, <a class="reference internal" href="appendix.html#c.Py_True" title="Py_True"><code class="xref c c-data docutils literal"><span class="pre">Py_True</span></code></a>, or
+<a class="reference internal" href="appendix.html#c.Py_False" title="Py_False"><code class="xref c c-data docutils literal"><span class="pre">Py_False</span></code></a>. These objects need to have proper reference counts just like
+any other, the only difference is that they should never get deallocated because
+their <a class="reference internal" href="appendix.html#ref-count"><span class="std std-ref">reference count</span></a> starts at 1. These global
+sentinel values have helper macros like: <a class="reference internal" href="appendix.html#c.Py_RETURN_NONE" title="Py_RETURN_NONE"><code class="xref c c-macro docutils literal"><span class="pre">Py_RETURN_NONE</span></code></a> which
+increment the reference count and return the object. These macros aren&#8217;t
+required but are a nice little convenience.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="gdb.html" class="btn btn-neutral float-right" title="Debugging with GDB" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="writing-a-class.html" class="btn btn-neutral" title="Writing a New Class in C" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Joe Jevnik.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

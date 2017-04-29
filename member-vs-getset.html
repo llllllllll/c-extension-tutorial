@@ -1,0 +1,347 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>PyMemberDef vs PyGetSetDef &mdash; c-extension-tutorial  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="c-extension-tutorial  documentation" href="index.html"/>
+        <link rel="next" title="Appendix" href="appendix.html"/>
+        <link rel="prev" title="Debugging with GDB" href="gdb.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> c-extension-tutorial
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="what-is-an-extension-module.html">What is an Extension Module?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="c-level-representation.html">C Level Representation of Python Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-function.html">Writing a New Function in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-and-importing.html">Building and Importing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error-handling.html">Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="abstract-api.html">Abstract Object API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fancy-argument-parsing.html">Fancy Argument Parsing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-class.html">Writing a New Class in C</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common-issues.html">Common Issues and Bugs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gdb.html">Debugging with GDB</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">PyMemberDef</span></code> vs <code class="docutils literal"><span class="pre">PyGetSetDef</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pymemberdef"><code class="docutils literal"><span class="pre">PyMemberDef</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pygetsetdef"><code class="docutils literal"><span class="pre">PyGetSetDef</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#expose-q-maxsize-to-python">Expose <code class="docutils literal"><span class="pre">q_maxsize</span></code> to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">c-extension-tutorial</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">PyMemberDef</span></code> vs <code class="docutils literal"><span class="pre">PyGetSetDef</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/member-vs-getset.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pymemberdef-vs-pygetsetdef">
+<h1><a class="reference internal" href="appendix.html#c.PyMemberDef" title="PyMemberDef"><code class="xref c c-type docutils literal"><span class="pre">PyMemberDef</span></code></a> vs <a class="reference internal" href="appendix.html#c.PyGetSetDef" title="PyGetSetDef"><code class="xref c c-type docutils literal"><span class="pre">PyGetSetDef</span></code></a><a class="headerlink" href="#pymemberdef-vs-pygetsetdef" title="Permalink to this headline">¶</a></h1>
+<p>Both <a class="reference internal" href="appendix.html#c.PyMemberDef" title="PyMemberDef"><code class="xref c c-type docutils literal"><span class="pre">PyMemberDef</span></code></a> and <a class="reference internal" href="appendix.html#c.PyGetSetDef" title="PyGetSetDef"><code class="xref c c-type docutils literal"><span class="pre">PyGetSetDef</span></code></a> can be used to expose
+members of our C instance structure to Python, and their differences are
+somewhat subtle.</p>
+<div class="section" id="pymemberdef">
+<h2><a class="reference internal" href="appendix.html#c.PyMemberDef" title="PyMemberDef"><code class="xref c c-type docutils literal"><span class="pre">PyMemberDef</span></code></a><a class="headerlink" href="#pymemberdef" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="appendix.html#c.PyMemberDef" title="PyMemberDef"><code class="xref c c-type docutils literal"><span class="pre">PyMemberDef</span></code></a> is the simpler of the two options. A <a class="reference internal" href="appendix.html#c.PyMemberDef" title="PyMemberDef"><code class="xref c c-type docutils literal"><span class="pre">PyMemberDef</span></code></a>
+defines a name for the attribute, the type as an enum value, the offset of
+the member to lookup, and whether the member is read only or read-write.</p>
+<p><a class="reference internal" href="appendix.html#c.PyMemberDef" title="PyMemberDef"><code class="xref c c-type docutils literal"><span class="pre">PyMemberDef</span></code></a> is ideal for exposing simple attributes of an
+instance. For example, imagine we have an instance structure like:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">PyObject</span> <span class="n">base</span><span class="p">;</span>
+    <span class="kt">float</span> <span class="n">float_field</span><span class="p">;</span>
+    <span class="n">PyObject</span><span class="o">*</span> <span class="n">object_field</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">mytype</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>We may want to make these fields accessible to Python using normal attribute
+access like: <code class="docutils literal"><span class="pre">mytype.float_field</span></code> or <code class="docutils literal"><span class="pre">mytype.object_field</span></code>. These can be
+exported with <a class="reference internal" href="appendix.html#c.PyMemberDef" title="PyMemberDef"><code class="xref c c-type docutils literal"><span class="pre">PyMemberDef</span></code></a> structures like:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">PyMemberDef</span> <span class="n">members</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">{</span><span class="s">&quot;float_field&quot;</span><span class="p">,</span>  <span class="cm">/* name */</span>
+     <span class="n">offsetof</span><span class="p">(</span><span class="n">mytype</span><span class="p">,</span> <span class="n">float_field</span><span class="p">),</span>  <span class="cm">/* offset */</span>
+     <span class="n">T_FLOAT</span><span class="p">,</span>  <span class="cm">/* type */</span>
+     <span class="n">READONLY</span><span class="p">,</span>  <span class="cm">/* flags */</span>
+     <span class="nb">NULL</span>  <span class="cm">/* docstring */</span><span class="p">},</span>
+    <span class="p">{</span><span class="s">&quot;object_field&quot;</span><span class="p">,</span>  <span class="cm">/* name */</span>
+     <span class="n">offsetof</span><span class="p">(</span><span class="n">mytype</span><span class="p">,</span> <span class="n">object_field</span><span class="p">),</span>  <span class="cm">/* offset */</span>
+     <span class="n">T_OBJECT_EX</span><span class="p">,</span>  <span class="cm">/* type */</span>
+     <span class="mi">0</span><span class="p">,</span>  <span class="cm">/* flags (0 means read-write) */</span>
+     <span class="nb">NULL</span>  <span class="cm">/* docstring */</span><span class="p">},</span>
+    <span class="p">{</span><span class="nb">NULL</span><span class="p">},</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>We would then set this array as the value of
+<a class="reference internal" href="appendix.html#c.PyTypeObject.tp_members" title="PyTypeObject.tp_members"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_members</span></code></a> to expose these attributes to Python.</p>
+</div>
+<div class="section" id="pygetsetdef">
+<h2><a class="reference internal" href="appendix.html#c.PyGetSetDef" title="PyGetSetDef"><code class="xref c c-type docutils literal"><span class="pre">PyGetSetDef</span></code></a><a class="headerlink" href="#pygetsetdef" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference internal" href="appendix.html#c.PyGetSetDef" title="PyGetSetDef"><code class="xref c c-type docutils literal"><span class="pre">PyGetSetDef</span></code></a> is the more powerful option for adding attributes to a C
+extension type. <a class="reference internal" href="appendix.html#c.PyGetSetDef" title="PyGetSetDef"><code class="xref c c-type docutils literal"><span class="pre">PyGetSetDef</span></code></a> allows us to register functions to be
+called to get or set the value of an attribute. This is like <a class="reference external" href="https://docs.python.org/3/library/functions.html#property" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">property</span></code></a>
+in Python.</p>
+<p><a class="reference internal" href="appendix.html#c.PyGetSetDef" title="PyGetSetDef"><code class="xref c c-type docutils literal"><span class="pre">PyGetSetDef</span></code></a> is useful for enforcing constraints on writes, or just
+computing attributes on the fly. Given the same struct <code class="docutils literal"><span class="pre">mytype</span></code> from before,
+we could add an attribute which could only store positive values.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">PyObject</span><span class="o">*</span>
+<span class="nf">mytype_get_float_field</span><span class="p">(</span><span class="n">mytype</span><span class="o">*</span> <span class="n">self</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">closure</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">PyFloat_FromFloat</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">float_field</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="kt">int</span>
+<span class="nf">mytype_set_float_field</span><span class="p">(</span><span class="n">mytype</span><span class="o">*</span> <span class="n">self</span><span class="p">,</span> <span class="n">PyObject</span><span class="o">*</span> <span class="n">value</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">closure</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">float</span> <span class="n">f</span> <span class="o">=</span> <span class="n">PyFloat_AsFloat</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">PyErr_Occurred</span><span class="p">())</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">f</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">PyErr_SetString</span><span class="p">(</span><span class="n">PyExc_ValueError</span><span class="p">,</span> <span class="s">&quot;float_field must be positive&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">self</span><span class="o">-&gt;</span><span class="n">float_field</span> <span class="o">=</span> <span class="n">f</span><span class="p">;</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">PyGetSetDef</span> <span class="n">getsets</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">{</span><span class="s">&quot;float_field&quot;</span><span class="p">,</span>  <span class="cm">/* name */</span>
+     <span class="p">(</span><span class="n">getter</span><span class="p">)</span> <span class="n">mytype_get_float_field</span><span class="p">,</span>
+     <span class="p">(</span><span class="n">setter</span><span class="p">)</span> <span class="n">mytype_set_float_field</span><span class="p">,</span>
+     <span class="nb">NULL</span><span class="p">,</span>  <span class="cm">/* doc */</span>
+     <span class="nb">NULL</span> <span class="cm">/* closure */</span><span class="p">},</span>
+    <span class="p">{</span><span class="nb">NULL</span><span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The power of this <a class="reference internal" href="appendix.html#c.PyGetSetDef" title="PyGetSetDef"><code class="xref c c-type docutils literal"><span class="pre">PyGetSetDef</span></code></a> is in the setter function. This function
+accepts <code class="docutils literal"><span class="pre">self</span></code> and the value to set as a <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a>. The function
+ensures that it has received a float and that the float is positive and then
+stores it on <code class="docutils literal"><span class="pre">self</span></code>. As you can imagine, you can implement any kind of complex
+logic that you would like in this function.</p>
+<p>The <code class="docutils literal"><span class="pre">closure</span></code> that is passed to both the getter and setter is some arbitrary
+pointer to be interpreted by your function. This is useful for writing a single
+getter or setter function which can be used with some configuration. For
+example, imagine <code class="docutils literal"><span class="pre">mytype</span></code> had three float fields that all wanted this same
+validation. We could pass the offset of the particular field as the closure so
+that the <code class="docutils literal"><span class="pre">setter</span></code> knew which field to set.</p>
+</div>
+<div class="section" id="expose-q-maxsize-to-python">
+<h2>Expose <code class="docutils literal"><span class="pre">q_maxsize</span></code> to Python<a class="headerlink" href="#expose-q-maxsize-to-python" title="Permalink to this headline">¶</a></h2>
+<p>As an exercise, expose the <code class="docutils literal"><span class="pre">q_maxsize</span></code> field of our <code class="docutils literal"><span class="pre">Queue</span></code> class to Python
+under the name <code class="docutils literal"><span class="pre">maxsize</span></code>.</p>
+<p>Start by implementing this as a <a class="reference internal" href="appendix.html#c.PyMemberDef" title="PyMemberDef"><code class="xref c c-type docutils literal"><span class="pre">PyMemberDef</span></code></a>.</p>
+<p>Once you have <code class="docutils literal"><span class="pre">maxsize</span></code> working as a <a class="reference internal" href="appendix.html#c.PyMemberDef" title="PyMemberDef"><code class="xref c c-type docutils literal"><span class="pre">PyMemberDef</span></code></a>, try writing it as
+a <a class="reference internal" href="appendix.html#c.PyGetSetDef" title="PyGetSetDef"><code class="xref c c-type docutils literal"><span class="pre">PyGetSetDef</span></code></a>. Add logic in the setter to prevent the maxsize from
+going below the current size.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="appendix.html" class="btn btn-neutral float-right" title="Appendix" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="gdb.html" class="btn btn-neutral" title="Debugging with GDB" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Joe Jevnik.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
