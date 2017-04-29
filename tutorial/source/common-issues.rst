@@ -82,7 +82,7 @@ A special kind of reference deficit that is easy to miss is a deficit of a
 global sentinel like :c:data:`Py_None`, :c:data:`Py_True`, or
 :c:data:`Py_False`. These objects need to have proper reference counts just like
 any other, the only difference is that they should never get deallocated because
-their :ref:`reference count <reference-count>` starts at 1. These global
+their :ref:`reference count <ref-count>` starts at 1. These global
 sentinel values have helper macros like: :c:macro:`Py_RETURN_NONE` which
 increment the reference count and return the object. These macros aren't
 required but are a nice little convenience.

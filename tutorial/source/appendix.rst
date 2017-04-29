@@ -1543,9 +1543,9 @@ Global Sentinels
          Py_INCREF(Py_None);
          return Py_None;
 
-         This is useful because people often forget that they need to call
-         :c:func:`Py_INCREF` on :c:data:`Py_None` even though it is a global
-         object.
+      This is useful because people often forget that they need to call
+      :c:func:`Py_INCREF` on :c:data:`Py_None` even though it is a global
+      object.
 
 .. c:var:: PyObject* Py_True
 
@@ -1560,9 +1560,9 @@ Global Sentinels
          Py_INCREF(Py_True);
          return Py_True;
 
-         This is useful because people often forget that they need to call
-         :c:func:`Py_INCREF` on :c:data:`Py_True` even though it is a global
-         object.
+      This is useful because people often forget that they need to call
+      :c:func:`Py_INCREF` on :c:data:`Py_True` even though it is a global
+      object.
 
 .. c:var:: PyObject* Py_False
 
@@ -1577,9 +1577,9 @@ Global Sentinels
          Py_INCREF(Py_False);
          return Py_False;
 
-         This is useful because people often forget that they need to call
-         :c:func:`Py_INCREF` on :c:data:`Py_False` even though it is a global
-         object.
+      This is useful because people often forget that they need to call
+      :c:func:`Py_INCREF` on :c:data:`Py_False` even though it is a global
+      object.
 
 CPython Functions and Macros
 ----------------------------
