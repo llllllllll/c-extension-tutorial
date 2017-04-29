@@ -99,14 +99,11 @@
 <li class="toctree-l1"><a class="reference internal" href="gdb.html">Debugging with GDB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="member-vs-getset.html"><code class="docutils literal"><span class="pre">PyMemberDef</span></code> vs <code class="docutils literal"><span class="pre">PyGetSetDef</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Appendix</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#glossary">Glossary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#reference-counting">Reference Counting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#reference-count">Reference Count</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#new-reference">New Reference</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#borrowed-reference">Borrowed Reference</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reference-stealing">Reference Stealing</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#reference-counting">Reference Counting</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#reference-count">Reference Count</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#py-incref"><code class="docutils literal"><span class="pre">Py_INCREF</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#py-xincref"><code class="docutils literal"><span class="pre">Py_XINCREF</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#py-decref"><code class="docutils literal"><span class="pre">Py_DECREF</span></code></a></li>
@@ -228,8 +225,18 @@
             
   <div class="section" id="appendix">
 <h1>Appendix<a class="headerlink" href="#appendix" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="glossary">
-<h2>Glossary<a class="headerlink" href="#glossary" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="reference-counting">
+<h2>Reference Counting<a class="headerlink" href="#reference-counting" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="reference-count">
+<span id="ref-count"></span><h3>Reference Count<a class="headerlink" href="#reference-count" title="Permalink to this headline">¶</a></h3>
+<p>The number of references to a given object. This is the count of objects which
+refer to the given object.</p>
+<p>When an object is created, its reference count starts at one, which is the
+reference owned by the creator. The reference count can be increased with
+<a class="reference internal" href="#c.Py_INCREF" title="Py_INCREF"><code class="xref c c-func docutils literal"><span class="pre">Py_INCREF()</span></code></a> or decreased with <a class="reference internal" href="#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal"><span class="pre">Py_DECREF()</span></code></a>. As soon as the
+reference count reaches zero, the object is no longer needed and it will be
+deallocated.</p>
+</div>
 <div class="section" id="new-reference">
 <span id="id1"></span><h3>New Reference<a class="headerlink" href="#new-reference" title="Permalink to this headline">¶</a></h3>
 <p>A new reference is a <a class="reference internal" href="#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> which must be managed by the user. The
@@ -254,19 +261,6 @@ stolen you need to call <a class="reference internal" href="#c.Py_INCREF" title=
 reference to the <code class="docutils literal"><span class="pre">value</span></code> argument. This is to make it easier to allocate new
 objects and put them right into a <a class="reference internal" href="#c.PyListObject" title="PyListObject"><code class="xref c c-type docutils literal"><span class="pre">PyListObject</span></code></a> without needing extra
 calls to <a class="reference internal" href="#c.Py_INCREF" title="Py_INCREF"><code class="xref c c-func docutils literal"><span class="pre">Py_INCREF()</span></code></a>.</p>
-</div>
-</div>
-<div class="section" id="reference-counting">
-<h2>Reference Counting<a class="headerlink" href="#reference-counting" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="reference-count">
-<span id="ref-count"></span><h3>Reference Count<a class="headerlink" href="#reference-count" title="Permalink to this headline">¶</a></h3>
-<p>The number of references to a given object. This is the count of objects which
-refer to the given object.</p>
-<p>When an object is created, its reference count starts at one, which is the
-reference owned by the creator. The reference count can be increased with
-<a class="reference internal" href="#c.Py_INCREF" title="Py_INCREF"><code class="xref c c-func docutils literal"><span class="pre">Py_INCREF()</span></code></a> or decreased with <a class="reference internal" href="#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal"><span class="pre">Py_DECREF()</span></code></a>. As soon as the
-reference count reaches zero, the object is no longer needed and it will be
-deallocated.</p>
 </div>
 <div class="section" id="py-incref">
 <h3><code class="docutils literal"><span class="pre">Py_INCREF</span></code><a class="headerlink" href="#py-incref" title="Permalink to this headline">¶</a></h3>
