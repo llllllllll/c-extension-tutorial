@@ -80,7 +80,7 @@ static int
 queue_clear(queue* self)
 {
     /* call the equivalent of `del self->q_elements[:]` in Python to remove all
-     * the members of our list which would clear any cycles */
+       the members of our list which would clear any cycles */
     if (PyList_SetSlice(self->q_elements,
                         0,  /* start */
                         PyList_GET_SIZE(self->q_elements), /* stop */
@@ -98,7 +98,7 @@ queue_repr(queue* self)
 {
     if (self->q_maxsize < 0) {
         /* repr which looks like '<queue.Queue: 4>' with 4 elements in the
-         * queue */
+           queue */
         return PyUnicode_FromFormat("<%s: %zd>",
                                     Py_TYPE(self)->tp_name,
                                     PyList_GET_SIZE(self->q_elements));
@@ -158,22 +158,102 @@ queue_pop(queue* self)
     return element;
 }
 
+PyDoc_STRVAR(queue_rotate_doc,
+             "Rotate the members of the queue ``steps`` steps to the right.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "steps : int\n"
+             "    The number of steps to rotate the queue.\n");
+
+static PyObject*
+queue_rotate(queue* self, PyObject* args, PyObject* kwargs)
+{
+    static char* keywords[] = {"steps", NULL};
+
+    Py_ssize_t steps;
+    Py_ssize_t n;
+    Py_ssize_t current_size;
+    PyObject* tmp;
+    PyObject* rotated_elements;
+
+    if (!PyArg_ParseTupleAndKeywords(args,
+                                     kwargs,
+                                     "n:rotate",
+                                     keywords,
+                                     &steps)) {
+        /* argument parsing failed */
+        return NULL;
+    }
+
+    current_size = PyList_GET_SIZE(self->q_elements);
+
+    if (!(current_size || steps)) {
+        /* the queue is empty or we are rotating by 0 (identity) */
+        Py_RETURN_NONE;
+    }
+
+    /* allocate a list with the same size as our queue to hold the newly
+       rotated elements */
+    if (!(rotated_elements = PyList_New(current_size))) {
+        /* allocation failed */
+        return NULL;
+    }
+
+    if (steps < 0) {
+        /* c module of -1 % n == -1 for n > 1. rotating left by n is the same as
+           rotating right by size - n so we add the current size to our negative
+           size */
+        steps += current_size;
+    }
+
+    for (n = 0; n < current_size; ++n) {
+        /* map elements in `self->q_elements` at index `n` to elements a index
+           `(n + steps) % current_size` in `rotated_elements`. */
+        tmp = PyList_GET_ITEM(self->q_elements, n);
+        /* `PyList_GET_ITEM` returns a borrowed reference, increment the ref
+           count of `tmp` because `PyList_SET_ITEM` steals the reference */
+        Py_INCREF(tmp);
+        PyList_SET_ITEM(rotated_elements, (n + steps) % current_size, tmp);
+    }
+
+    /* release our reference to `q_elements`; we no longer need it */
+    Py_DECREF(self->q_elements);
+
+    /* replace `q_elements` with `rotated_elements`, this gives away our
+       reference to `rotated_elements` */
+    self->q_elements = rotated_elements;
+
+    Py_RETURN_NONE;
+}
+
 PyMethodDef queue_methods[] = {
     {"push", (PyCFunction) queue_push, METH_VARARGS | METH_KEYWORDS, NULL},
     {"pop", (PyCFunction) queue_pop, METH_NOARGS, NULL},
+    {"rotate",
+     (PyCFunction) queue_rotate,
+     METH_VARARGS | METH_KEYWORDS,
+     queue_rotate_doc},
     {NULL},
 };
 
 static Py_ssize_t
 queue_size(queue* self)
 {
+    /* return the size of the `q_elements` list */
     return PyList_GET_SIZE(self->q_elements);
 }
 
 static PyObject*
 queue_item(queue* self, Py_ssize_t ix)
 {
+    /* lookup `ix` in the `q_elements` list with bounds checking */
     PyObject* element = PyList_GetItem(self->q_elements, ix);
+    /* `PyList_GetItem` returns a borrowed reference. Increment the reference
+       count because `sq_item` needs to return a new reference. If an error
+       occurred, `element` will be NULL. `Py_XINCREF` does a NULL check before
+       incrementing the element. This allows us to safely propagate an error
+       if it is set. */
     Py_XINCREF(element);
     return element;
 }
@@ -181,6 +261,8 @@ queue_item(queue* self, Py_ssize_t ix)
 static int
 queue_contains(queue* self, PyObject* element)
 {
+    /* defer to `PyListObject`'s sequence protocol implementation for
+       contains */
     return PySequence_Contains(self->q_elements, element);
 }
 
@@ -200,6 +282,7 @@ PySequenceMethods queue_as_sequence = {
 static PyObject*
 queue_get_maxsize(queue* self, void* context)
 {
+    /* simply return the `q_maxsize` boxed as an int object */
     return PyLong_FromSsize_t(self->q_maxsize);
 }
 
@@ -208,6 +291,8 @@ queue_set_maxsize(queue* self, PyObject* value_ob, void* context)
 {
     Py_ssize_t value = PyLong_AsSsize_t(value_ob);
     if (PyErr_Occurred()) {
+        /* failed to convert the argument to a `Py_ssize_t`, reraise the
+           error */
         return -1;
     }
 
@@ -231,8 +316,8 @@ PyGetSetDef queue_getset[] = {
     {"maxsize",
      (getter) queue_get_maxsize,
      (setter) queue_set_maxsize,
-     NULL,
-     NULL},
+     NULL,  /* doc */
+     NULL   /* closure */},
     {NULL},
 };
 

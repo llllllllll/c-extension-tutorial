@@ -9,6 +9,7 @@ a ``setup.py`` file. We start with a normal setuptools ``setup.py`` file, for
 example:
 
 .. code-block:: python
+   :emphasize-lines: 14
 
    from setuptools import setup, find_packages
 

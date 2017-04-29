@@ -19,7 +19,7 @@ Borrowed Reference
 ~~~~~~~~~~~~~~~~~~
 
 A borrowed reference is a :c:type:`PyObject*` which is not owned. Users should
-*not* call :c:func:`Py_DECREF` when they are done with this object. A borrowed
+**not** call :c:func:`Py_DECREF` when they are done with this object. A borrowed
 reference can become a :ref:`new reference <new-reference>` by calling
 :c:func:`Py_INCREF` on the it.
 
@@ -30,7 +30,7 @@ Reference Stealing
 
 Some functions will "steal" a reference to an argument. This means the function
 will assume ownership of the reference that has been given to it. Callers should
-*not* call :c:func:`Py_DECREF` the object after the reference has been
+**not** call :c:func:`Py_DECREF` the object after the reference has been
 stolen. If you need to keep your own reference to the object after it has been
 stolen you need to call :c:func:`Py_INCREF` **before** the reference is stolen.
 
@@ -47,7 +47,7 @@ Reference Counting
 Reference Count
 ~~~~~~~~~~~~~~~
 
-The number of refererants of a given object. This is the count of objects which
+The number of references to a given object. This is the count of objects which
 refer to the given object.
 
 When an object is created, its reference count starts at one, which is the
@@ -601,6 +601,7 @@ Fields
    Below we have a weakly referenceable type:
 
    .. code-block:: c
+      :emphasize-lines: 3, 9
 
       typedef struct {
           PyObject wr_base;
@@ -610,9 +611,7 @@ Fields
 
       PyTypeObject mytype_type = {
           /* ... */
-
           offsetof(mytype, wr_weaklist),  /* tp_weaklistoffset */
-
           /* ... */
       };
 
@@ -646,8 +645,8 @@ Fields
 .. c:member:: iternextfunc PyTypeObject.tp_iternext
 
    The C API equivalent of ``__next__``. The core difference is that
-   :c:data:`PyExc_StopIteration` does *not* need to be set when the iterator is
-   exhausted. This will be done before returning to Python but the exception
+   :c:data:`PyExc_StopIteration` does **not** need to be set when the iterator
+   is exhausted. This will be done before returning to Python but the exception
    overhead can be avoided when being called from C.
 
    If this slot is set, :c:member:`PyTypeObject.tp_iter` should be a function
@@ -908,6 +907,7 @@ Fields
    Below we have a type with a ``__dict__``:
 
    .. code-block:: c
+      :emphasize-lines: 3, 9
 
       typedef struct {
           PyObject wd_base;
@@ -917,9 +917,7 @@ Fields
 
       PyTypeObject mytype_type = {
           /* ... */
-
           offsetof(mytype, wd_dict),  /* tp_dictoffset */
-
           /* ... */
       };
 
@@ -1532,38 +1530,56 @@ API Functions
 Global Sentinels
 ----------------
 
-``Py_None``
-~~~~~~~~~~~
-
 .. c:var:: PyObject* Py_None
 
    A global reference to ``None``.
 
-.. c:macro:: Py_RETURN_NONE
+   .. c:macro:: Py_RETURN_NONE
 
-   Shorthand for:
+      Shorthand for:
 
-   .. code-block:: c
+      .. code-block:: c
 
-      Py_INCREF(Py_None);
-      return Py_None;
+         Py_INCREF(Py_None);
+         return Py_None;
 
-   This is useful because people often forget that they need to call
-   :c:func:`Py_INCREF` on :c:data:`Py_None` even though it is a global object.
-
-``Py_True``
-~~~~~~~~~~~
+         This is useful because people often forget that they need to call
+         :c:func:`Py_INCREF` on :c:data:`Py_None` even though it is a global
+         object.
 
 .. c:var:: PyObject* Py_True
 
    A global reference to ``True``.
 
-``Py_False``
-~~~~~~~~~~~~
+   .. c:macro:: Py_RETURN_TRUE
+
+      Shorthand for:
+
+      .. code-block:: c
+
+         Py_INCREF(Py_True);
+         return Py_True;
+
+         This is useful because people often forget that they need to call
+         :c:func:`Py_INCREF` on :c:data:`Py_True` even though it is a global
+         object.
 
 .. c:var:: PyObject* Py_False
 
    A global reference to ``False``.
+
+   .. c:macro:: Py_RETURN_FALSE
+
+      Shorthand for:
+
+      .. code-block:: c
+
+         Py_INCREF(Py_False);
+         return Py_False;
+
+         This is useful because people often forget that they need to call
+         :c:func:`Py_INCREF` on :c:data:`Py_False` even though it is a global
+         object.
 
 CPython Functions and Macros
 ----------------------------
@@ -1903,9 +1919,10 @@ like accepting an object as ``O`` and then using :c:func:`PyObject_IsTrue`.
 .. warning::
 
    The CPython docs mention converters for ``unsigned`` integral types which do
-   *not* do overflow checking. These converters should not be used because they
-   fail to handle negative integers. The proper way to handle these values is to
-   accept them as ``O`` and use one of the ``PyLong_As*`` conversion functions.
+   **not** do overflow checking. These converters should not be used because
+   they fail to handle negative integers. The proper way to handle these values
+   is to accept them as ``O`` and use one of the ``PyLong_As*`` conversion
+   functions.
 
 Special Characters
 ``````````````````

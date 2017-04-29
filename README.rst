@@ -44,11 +44,6 @@ using the same version of CPython with the same compile time flags.
 Viewing the Tutorial
 --------------------
 
-.. warning::
-
-   The tutorial content is not complete! The install instructions above are
-   valid but the content is not complete yet so don't read ahead!
-
 The tutorial is structured as a sphinx project. This allows the tutorial to be
 viewed from a standard browser or hosted online.
 
