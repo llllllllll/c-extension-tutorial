@@ -179,13 +179,13 @@ interpreter.</p>
 <span class="p">};</span>
 </pre></div>
 </div>
-<p>The <a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_type" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">ob_type</span></code></a> field is a pointer to the Python type for the
+<p>The <a class="reference internal" href="appendix.html#c.PyObject.ob_type" title="PyObject.ob_type"><code class="xref c c-member docutils literal"><span class="pre">ob_type</span></code></a> field is a pointer to the Python type for the
 object. This is how objects communicate their runtime type. For example: if a
 given <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> points to a unicode object, then the
-<a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_type" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">ob_type</span></code></a> field will be set to <code class="docutils literal"><span class="pre">&amp;PyUnicode_Type</span></code> where
-<code class="docutils literal"><span class="pre">PyUnicode_Type</span></code> is the Python <code class="docutils literal"><span class="pre">unicode</span></code> type. This should be accessed
-through <a class="reference internal" href="appendix.html#c.Py_TYPE" title="Py_TYPE"><code class="xref c c-func docutils literal"><span class="pre">Py_TYPE()</span></code></a>.</p>
-<p>the <a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_refcnt" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">ob_refcnt</span></code></a> is the <a class="reference internal" href="appendix.html#ref-count"><span class="std std-ref">reference count</span></a> of
+<a class="reference internal" href="appendix.html#c.PyObject.ob_type" title="PyObject.ob_type"><code class="xref c c-member docutils literal"><span class="pre">ob_type</span></code></a> field will be set to <code class="xref c c-data docutils literal"><span class="pre">&amp;PyUnicode_Type</span></code>
+where <a class="reference external" href="https://docs.python.org/3/c-api/unicode.html#c.PyUnicode_Type" title="(in Python v3.6)"><code class="xref c c-data docutils literal"><span class="pre">PyUnicode_Type</span></code></a> is the Python <code class="xref py py-class docutils literal"><span class="pre">unicode</span></code> type. This should
+be accessed through <a class="reference internal" href="appendix.html#c.Py_TYPE" title="Py_TYPE"><code class="xref c c-func docutils literal"><span class="pre">Py_TYPE()</span></code></a>.</p>
+<p>the <a class="reference internal" href="appendix.html#c.PyObject.ob_refcnt" title="PyObject.ob_refcnt"><code class="xref c c-member docutils literal"><span class="pre">ob_refcnt</span></code></a> is the <a class="reference internal" href="appendix.html#ref-count"><span class="std std-ref">reference count</span></a> of
 the object. This is the number of places where this object is being used. This
 should be accessed through <a class="reference internal" href="appendix.html#c.Py_REFCNT" title="Py_REFCNT"><code class="xref c c-func docutils literal"><span class="pre">Py_REFCNT()</span></code></a>.</p>
 <div class="section" id="object-lifetime">
@@ -200,15 +200,15 @@ the object is no longer needed and it will be deallocated.</p>
 <h2>Concrete Types<a class="headerlink" href="#concrete-types" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> is an abstract reference that can point to any type;
 however, we eventually need to actually store information on an object. Subtypes
-of <code class="docutils literal"><span class="pre">object</span></code> are represented by <code class="docutils literal"><span class="pre">struct</span></code>s whose first member is a
-<code class="docutils literal"><span class="pre">PyObject</span></code> followed by any instance data needed.</p>
+of <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a> are represented by <code class="docutils literal"><span class="pre">struct</span></code>s whose first member is a
+<a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject</span></code></a> followed by any instance data needed.</p>
 <p>In C, a pointer to a <code class="docutils literal"><span class="pre">struct</span></code> is equivalent to a pointer to its first member,
 this makes it safe to cast from a type defined this way to and from
-<code class="docutils literal"><span class="pre">PyObject*</span></code>.</p>
+<a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a>.</p>
 <p>Users rarely need to use the more specialized type when working with the CPython
 API because most APIs expect and return plain <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> values.</p>
-<p>One case where users often work with a concrete type is <a class="reference internal" href="appendix.html#c.PyTypeObject" title="PyTypeObject"><code class="xref c c-type docutils literal"><span class="pre">PyTypeObject*</span></code></a>
-which is the result of <a class="reference internal" href="appendix.html#c.Py_TYPE" title="Py_TYPE"><code class="xref c c-func docutils literal"><span class="pre">Py_TYPE()</span></code></a>.</p>
+<p>One exception where users often work with a concrete type is
+<a class="reference internal" href="appendix.html#c.PyTypeObject" title="PyTypeObject"><code class="xref c c-type docutils literal"><span class="pre">PyTypeObject*</span></code></a> which is the result of <a class="reference internal" href="appendix.html#c.Py_TYPE" title="Py_TYPE"><code class="xref c c-func docutils literal"><span class="pre">Py_TYPE()</span></code></a>.</p>
 </div>
 </div>
 

@@ -125,11 +125,11 @@ CPython Types
    ``PyObject`` is the structure which holds Python values. The definition looks
    like:
 
-   .. c:member:: Py_ssize_t PyObject.ob_refcnt
+   .. c:member:: Py_ssize_t ob_refcnt
 
       The object's :ref:`reference count <ref-count>`.
 
-   .. c:member:: PyTypeObject* PyObject.ob_type
+   .. c:member:: PyTypeObject* ob_type
 
       The object's type as a Python object.
 
@@ -291,48 +291,48 @@ Fields
 
       A collection of function pointers used to support the Sequence API.
 
-      .. c:member:: lenfunc PySequenceMethods.sq_length
+      .. c:member:: lenfunc sq_length
 
          The function used to support :c:func:`PyObject_Size`. This function
          will automatically be converted into a Python ``__len__``.
 
-      .. c:member:: binaryfunc PySequenceMethods.sq_concat
+      .. c:member:: binaryfunc sq_concat
 
          The function used to support :c:func:`PySequence_Concat`. If there is
          no :c:member:`PyNumberMethods.nb_add` function, this will be turned
          into a ``__add__`` function (like ``list + list`` in Python).
 
-      .. c:member:: ssizeargfunc PySequenceMethods.sq_repeat
+      .. c:member:: ssizeargfunc sq_repeat
 
          The function used to support :c:func:`PySequence_Repeat`. If there is
          no :c:member:`PyNumberMethods.nb_multiply` this will be turned into a
          ``__mul__`` function (like ``list * int`` in Python).
 
-      .. c:member:: ssizeargfunc PySequenceMethods.sq_item
+      .. c:member:: ssizeargfunc sq_item
 
          The function used to support :c:func:`PySequenceMethods.sq_item`. This
          function will be converted into a ``__getitem__`` method in Python.
 
-      .. c:member:: ssizeobjargproc PySequenceMethods.sq_ass_item
+      .. c:member:: ssizeobjargproc sq_ass_item
 
          The function used to support :c:func:`PySequence_SetItem`. This slot
          can be :c:data:`NULL` if the object doesn't support assignment (like
          ``tuple``).  This will be converted into a ``__setitem__`` method in
          Python.
 
-      .. c:member:: objobjproc PySequenceMethods.sq_contains
+      .. c:member:: objobjproc sq_contains
 
          The function used to support :c:func:`PySequence_Contains`. If this is
          left :c:data:`NULL`, a linear search will be performed. This function
          will be converted into a ``__contains__`` method in Python.
 
-      .. c:member:: binaryfunc PySequenceMethods.sq_inplace_concat
+      .. c:member:: binaryfunc sq_inplace_concat
 
          The function used to support :c:func:`PySequence_InPlaceConcat`. It
          should modify ``self`` in place and then return ``self``. This function
          is like ``list += list`` in Python.
 
-      .. c:member:: binaryfunc PySequenceMethods.sq_inplace_repeat
+      .. c:member:: binaryfunc sq_inplace_repeat
 
          The function used to support :c:func:`PySequence_InPlaceRepeat`. It
          should modify ``self`` in place and then return ``self``. This function
@@ -673,11 +673,11 @@ Fields
       A structure which defines a descriptor for exposing a C member as a Python
       member.
 
-      .. c:member:: char* PyMemberDef.name
+      .. c:member:: char* name
 
          The name of the member as a C string.
 
-      .. c:member:: int PyMemberDef.type
+      .. c:member:: int type
 
          The type code of the member.
 
@@ -768,12 +768,12 @@ Fields
 
             A :c:type:`Py_ssize_t` member to be converted into a Python ``int``.
 
-      .. c:member:: Py_ssize_t PyMemberDef.offset
+      .. c:member:: Py_ssize_t offset
 
          The offset into the C structure where this member appears. You should
          always compute this offset with the ``offsetof`` operator.
 
-      .. c:member:: int PyMemberDef.flags
+      .. c:member:: int flags
 
          Flag bits for indicating read or write status. The options are ``0``
          for read and write access or :c:macro:`READONLY` for read only access.
@@ -1377,20 +1377,20 @@ API Functions
    Structure used to describe a method of an extension type. This structure has
    four fields.
 
-   .. c:member:: char* PyMethodDef.ml_name
+   .. c:member:: char* ml_name
 
       The name of the method as a C string.
 
-   .. c:member:: PyCFunction PyMethodDef.ml_meth
+   .. c:member:: PyCFunction ml_meth
 
       A pointer to the C implmenetation of the method.
 
-   .. c:member:: int PyMethodDef.ml_flags
+   .. c:member:: int ml_flags
 
       Flag bits indicating how to call :c:member:`~PyMethodDef.ml_meth` should
       be called or bound to a class.
 
-   .. c:member:: char* PyMethodDef.ml_doc
+   .. c:member:: char* ml_doc
 
       The contents of the method's docstring as a C string. If this is
       :c:data:`NULL`, the docstring will be ``None`` in Python. This should be
@@ -1468,47 +1468,47 @@ API Functions
 
    A specification of a Python module object.
 
-   .. c:member:: PyModuleDef_Base PyModuleDef.m_base
+   .. c:member:: PyModuleDef_Base m_base
 
       The part of the module definition managed by CPython. Always initialize
       this with ``PyModuleDef_HEAD_INIT``.
 
-   .. c:member:: char* PyModuleDef.m_name
+   .. c:member:: char* m_name
 
       The name of the module as a C string.
 
-   .. c:member:: char* PyModuleDef.m_doc
+   .. c:member:: char* m_doc
 
       The docstring of the module as a C string. If set to :c:data:`NULL` this
       will be ``None`` in Python This should be created with
       :c:func:`PyDoc_STRVAR`.
 
-   .. c:member:: Py_ssize_t PyModuleDef.m_size
+   .. c:member:: Py_ssize_t m_size
 
       The size of the module's global state. If set to -1 this will not allocate
       any space for global state.
 
-   .. c:member:: PyMethodDef* PyModuleDef.m_methods
+   .. c:member:: PyMethodDef* m_methods
 
       A :c:data:`NULL` terminated array of methods to put in this module.
 
-   .. c:member:: PyModuleDef_Slot* PyModuleDef.m_slots
+   .. c:member:: PyModuleDef_Slot* m_slots
 
       A :c:data:`NULL` terminated array of slots for using multi-phase
       initialization. This is not used in this tutorial and can be set to
       :c:data:`NULL`.
 
-   .. c:member:: traverseproc PyModuleDef.m_traverse
+   .. c:member:: traverseproc m_traverse
 
       The function used for traversing the global state allocated with
       :c:member:`~PyModuleDef.m_size`. This can be :c:data:`NULL` if not needed.
 
-   .. c:member:: inquiry PyModuleDef.m_clear
+   .. c:member:: inquiry m_clear
 
       The function used for clearing the global state allocated with
       :c:member:`~PyModuleDef.m_size`. This can be :c:data:`NULL` if not needed.
 
-   .. c:member:: freefunc PyModuleDef.m_free
+   .. c:member:: freefunc m_free
 
       The function used for freeing the global state allocated with
       :c:member:`~PyModuleDef.m_size`. This can be :c:data:`NULL` if not needed.

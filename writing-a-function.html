@@ -199,8 +199,8 @@
 </pre></div>
 </div>
 <p>Now that we have a a C function we need to provide a way to convert our
-<a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a>s to and from C <code class="xref c c-type docutils literal"><span class="pre">unsigned</span> <span class="pre">long</span></code> objects to invoke this
-from Python.</p>
+<a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a>s to and from C <code class="xref c c-type docutils literal"><span class="pre">unsigned</span> <span class="pre">long</span></code> objects to invoke
+this from Python.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">It is important to declare all functions as <code class="docutils literal"><span class="pre">static</span></code>. This is normally good
@@ -213,9 +213,9 @@ is a very large project. We don&#8217;t want to pollute the namespace.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Python <code class="xref c c-type docutils literal"><span class="pre">int</span></code> objects are called <a class="reference internal" href="appendix.html#c.PyLongObject" title="PyLongObject"><code class="xref c c-type docutils literal"><span class="pre">PyLongObject</span></code></a> in the C API
-as a holdover from when <code class="xref c c-type docutils literal"><span class="pre">int</span></code> and <code class="xref c c-type docutils literal"><span class="pre">long</span></code> were different in
-Python 2. In Python 3: <code class="xref c c-type docutils literal"><span class="pre">int</span></code> is arbitrarily sized like the old Python
-2 <code class="xref c c-type docutils literal"><span class="pre">long</span></code>.</p>
+as a holdover from when <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a> and <code class="xref py py-class docutils literal"><span class="pre">long</span></code> were different in
+Python 2. In Python 3: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a> is arbitrarily sized like the old Python
+2 <code class="xref py py-class docutils literal"><span class="pre">long</span></code>.</p>
 </div>
 </div>
 <div class="section" id="adapting-long-objects">
@@ -225,8 +225,8 @@ Python objects. For <code class="xref c c-type docutils literal"><span class="pr
 <a class="reference internal" href="appendix.html#c.PyLong_FromUnsignedLong" title="PyLong_FromUnsignedLong"><code class="xref c c-func docutils literal"><span class="pre">PyLong_FromUnsignedLong()</span></code></a> and <a class="reference internal" href="appendix.html#c.PyLong_AsUnsignedLong" title="PyLong_AsUnsignedLong"><code class="xref c c-func docutils literal"><span class="pre">PyLong_AsUnsignedLong()</span></code></a> to convert
 to and from C unsigned long objects.</p>
 <p>We can then write a wrapping function to do this conversion for us:</p>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">PyObject</span> <span class="o">*</span>
-<span class="nf">pyfib</span><span class="p">(</span><span class="n">PyObject</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="n">PyObject</span> <span class="o">*</span><span class="n">n</span><span class="p">)</span>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">PyObject</span><span class="o">*</span>
+<span class="nf">pyfib</span><span class="p">(</span><span class="n">PyObject</span><span class="o">*</span> <span class="n">self</span><span class="p">,</span> <span class="n">PyObject</span><span class="o">*</span> <span class="n">n</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">as_unsigned_long</span> <span class="o">=</span> <span class="n">PyLong_AsUnsignedLong</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
     <span class="n">PyObject</span> <span class="o">*</span><span class="n">result</span> <span class="o">=</span> <span class="n">PyLong_FromUnsignedLong</span><span class="p">(</span><span class="n">cfib</span><span class="p">(</span><span class="n">as_unsigned</span><span class="p">));</span>
@@ -273,7 +273,7 @@ all docstrings in the <a class="reference internal" href="appendix.html#c.PyDoc_
 <h3><a class="reference internal" href="appendix.html#c.METH_O" title="METH_O"><code class="xref c c-macro docutils literal"><span class="pre">METH_O</span></code></a><a class="headerlink" href="#meth-o" title="Permalink to this headline">¶</a></h3>
 <p>For our function we only accept a single argument as a <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject*</span></code></a> so we
 can use the <a class="reference internal" href="appendix.html#c.METH_O" title="METH_O"><code class="xref c c-macro docutils literal"><span class="pre">METH_O</span></code></a> flag. For a list of the available flags see:
-<code class="xref c c-member docutils literal"><span class="pre">PyMethodDef.ml_flags</span></code>.</p>
+<a class="reference internal" href="appendix.html#c.PyMethodDef.ml_flags" title="PyMethodDef.ml_flags"><code class="xref c c-member docutils literal"><span class="pre">PyMethodDef.ml_flags</span></code></a>.</p>
 </div>
 <div class="section" id="creating-a-python-module">
 <h3>Creating a Python Module<a class="headerlink" href="#creating-a-python-module" title="Permalink to this headline">¶</a></h3>

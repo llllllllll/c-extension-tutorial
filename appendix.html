@@ -390,14 +390,14 @@ sizes. On many platforms this is an alias of <code class="xref c c-type docutils
 <p><code class="docutils literal"><span class="pre">PyObject</span></code> is the structure which holds Python values. The definition looks
 like:</p>
 <dl class="member">
-<dt id="c.PyObject.PyObject.ob_refcnt">
-<a class="reference internal" href="#c.Py_ssize_t" title="Py_ssize_t">Py_ssize_t</a> <code class="descname">PyObject.ob_refcnt</code><a class="headerlink" href="#c.PyObject.PyObject.ob_refcnt" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyObject.ob_refcnt">
+<a class="reference internal" href="#c.Py_ssize_t" title="Py_ssize_t">Py_ssize_t</a> <code class="descname">ob_refcnt</code><a class="headerlink" href="#c.PyObject.ob_refcnt" title="Permalink to this definition">¶</a></dt>
 <dd><p>The object&#8217;s <a class="reference internal" href="#ref-count"><span class="std std-ref">reference count</span></a>.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyObject.PyObject.ob_type">
-<a class="reference internal" href="#c.PyTypeObject" title="PyTypeObject">PyTypeObject</a>* <code class="descname">PyObject.ob_type</code><a class="headerlink" href="#c.PyObject.PyObject.ob_type" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyObject.ob_type">
+<a class="reference internal" href="#c.PyTypeObject" title="PyTypeObject">PyTypeObject</a>* <code class="descname">ob_type</code><a class="headerlink" href="#c.PyObject.ob_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>The object&#8217;s type as a Python object.</p>
 </dd></dl>
 
@@ -572,38 +572,38 @@ individually.</p>
 <code class="descname">PySequenceMethods</code><a class="headerlink" href="#c.PySequenceMethods" title="Permalink to this definition">¶</a></dt>
 <dd><p>A collection of function pointers used to support the Sequence API.</p>
 <dl class="member">
-<dt id="c.PySequenceMethods.PySequenceMethods.sq_length">
-<a class="reference internal" href="#c.lenfunc" title="lenfunc">lenfunc</a> <code class="descname">PySequenceMethods.sq_length</code><a class="headerlink" href="#c.PySequenceMethods.PySequenceMethods.sq_length" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PySequenceMethods.sq_length">
+<a class="reference internal" href="#c.lenfunc" title="lenfunc">lenfunc</a> <code class="descname">sq_length</code><a class="headerlink" href="#c.PySequenceMethods.sq_length" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function used to support <a class="reference external" href="https://docs.python.org/3/c-api/object.html#c.PyObject_Size" title="(in Python v3.6)"><code class="xref c c-func docutils literal"><span class="pre">PyObject_Size()</span></code></a>. This function
 will automatically be converted into a Python <code class="docutils literal"><span class="pre">__len__</span></code>.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PySequenceMethods.PySequenceMethods.sq_concat">
-<a class="reference internal" href="#c.binaryfunc" title="binaryfunc">binaryfunc</a> <code class="descname">PySequenceMethods.sq_concat</code><a class="headerlink" href="#c.PySequenceMethods.PySequenceMethods.sq_concat" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PySequenceMethods.sq_concat">
+<a class="reference internal" href="#c.binaryfunc" title="binaryfunc">binaryfunc</a> <code class="descname">sq_concat</code><a class="headerlink" href="#c.PySequenceMethods.sq_concat" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function used to support <a class="reference external" href="https://docs.python.org/3/c-api/sequence.html#c.PySequence_Concat" title="(in Python v3.6)"><code class="xref c c-func docutils literal"><span class="pre">PySequence_Concat()</span></code></a>. If there is
 no <code class="xref c c-member docutils literal"><span class="pre">PyNumberMethods.nb_add</span></code> function, this will be turned
 into a <code class="docutils literal"><span class="pre">__add__</span></code> function (like <code class="docutils literal"><span class="pre">list</span> <span class="pre">+</span> <span class="pre">list</span></code> in Python).</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PySequenceMethods.PySequenceMethods.sq_repeat">
-<a class="reference internal" href="#c.ssizeargfunc" title="ssizeargfunc">ssizeargfunc</a> <code class="descname">PySequenceMethods.sq_repeat</code><a class="headerlink" href="#c.PySequenceMethods.PySequenceMethods.sq_repeat" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PySequenceMethods.sq_repeat">
+<a class="reference internal" href="#c.ssizeargfunc" title="ssizeargfunc">ssizeargfunc</a> <code class="descname">sq_repeat</code><a class="headerlink" href="#c.PySequenceMethods.sq_repeat" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function used to support <a class="reference external" href="https://docs.python.org/3/c-api/sequence.html#c.PySequence_Repeat" title="(in Python v3.6)"><code class="xref c c-func docutils literal"><span class="pre">PySequence_Repeat()</span></code></a>. If there is
 no <code class="xref c c-member docutils literal"><span class="pre">PyNumberMethods.nb_multiply</span></code> this will be turned into a
 <code class="docutils literal"><span class="pre">__mul__</span></code> function (like <code class="docutils literal"><span class="pre">list</span> <span class="pre">*</span> <span class="pre">int</span></code> in Python).</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PySequenceMethods.PySequenceMethods.sq_item">
-<a class="reference internal" href="#c.ssizeargfunc" title="ssizeargfunc">ssizeargfunc</a> <code class="descname">PySequenceMethods.sq_item</code><a class="headerlink" href="#c.PySequenceMethods.PySequenceMethods.sq_item" title="Permalink to this definition">¶</a></dt>
-<dd><p>The function used to support <code class="xref c c-func docutils literal"><span class="pre">PySequenceMethods.sq_item()</span></code>. This
+<dt id="c.PySequenceMethods.sq_item">
+<a class="reference internal" href="#c.ssizeargfunc" title="ssizeargfunc">ssizeargfunc</a> <code class="descname">sq_item</code><a class="headerlink" href="#c.PySequenceMethods.sq_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function used to support <a class="reference internal" href="#c.PySequenceMethods.sq_item" title="PySequenceMethods.sq_item"><code class="xref c c-func docutils literal"><span class="pre">PySequenceMethods.sq_item()</span></code></a>. This
 function will be converted into a <code class="docutils literal"><span class="pre">__getitem__</span></code> method in Python.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PySequenceMethods.PySequenceMethods.sq_ass_item">
-<a class="reference internal" href="#c.ssizeobjargproc" title="ssizeobjargproc">ssizeobjargproc</a> <code class="descname">PySequenceMethods.sq_ass_item</code><a class="headerlink" href="#c.PySequenceMethods.PySequenceMethods.sq_ass_item" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PySequenceMethods.sq_ass_item">
+<a class="reference internal" href="#c.ssizeobjargproc" title="ssizeobjargproc">ssizeobjargproc</a> <code class="descname">sq_ass_item</code><a class="headerlink" href="#c.PySequenceMethods.sq_ass_item" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function used to support <a class="reference external" href="https://docs.python.org/3/c-api/sequence.html#c.PySequence_SetItem" title="(in Python v3.6)"><code class="xref c c-func docutils literal"><span class="pre">PySequence_SetItem()</span></code></a>. This slot
 can be <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> if the object doesn&#8217;t support assignment (like
 <code class="docutils literal"><span class="pre">tuple</span></code>).  This will be converted into a <code class="docutils literal"><span class="pre">__setitem__</span></code> method in
@@ -611,24 +611,24 @@ Python.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PySequenceMethods.PySequenceMethods.sq_contains">
-<a class="reference internal" href="#c.objobjproc" title="objobjproc">objobjproc</a> <code class="descname">PySequenceMethods.sq_contains</code><a class="headerlink" href="#c.PySequenceMethods.PySequenceMethods.sq_contains" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PySequenceMethods.sq_contains">
+<a class="reference internal" href="#c.objobjproc" title="objobjproc">objobjproc</a> <code class="descname">sq_contains</code><a class="headerlink" href="#c.PySequenceMethods.sq_contains" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function used to support <a class="reference external" href="https://docs.python.org/3/c-api/sequence.html#c.PySequence_Contains" title="(in Python v3.6)"><code class="xref c c-func docutils literal"><span class="pre">PySequence_Contains()</span></code></a>. If this is
 left <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code>, a linear search will be performed. This function
 will be converted into a <code class="docutils literal"><span class="pre">__contains__</span></code> method in Python.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PySequenceMethods.PySequenceMethods.sq_inplace_concat">
-<a class="reference internal" href="#c.binaryfunc" title="binaryfunc">binaryfunc</a> <code class="descname">PySequenceMethods.sq_inplace_concat</code><a class="headerlink" href="#c.PySequenceMethods.PySequenceMethods.sq_inplace_concat" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PySequenceMethods.sq_inplace_concat">
+<a class="reference internal" href="#c.binaryfunc" title="binaryfunc">binaryfunc</a> <code class="descname">sq_inplace_concat</code><a class="headerlink" href="#c.PySequenceMethods.sq_inplace_concat" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function used to support <a class="reference external" href="https://docs.python.org/3/c-api/sequence.html#c.PySequence_InPlaceConcat" title="(in Python v3.6)"><code class="xref c c-func docutils literal"><span class="pre">PySequence_InPlaceConcat()</span></code></a>. It
 should modify <code class="docutils literal"><span class="pre">self</span></code> in place and then return <code class="docutils literal"><span class="pre">self</span></code>. This function
 is like <code class="docutils literal"><span class="pre">list</span> <span class="pre">+=</span> <span class="pre">list</span></code> in Python.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PySequenceMethods.PySequenceMethods.sq_inplace_repeat">
-<a class="reference internal" href="#c.binaryfunc" title="binaryfunc">binaryfunc</a> <code class="descname">PySequenceMethods.sq_inplace_repeat</code><a class="headerlink" href="#c.PySequenceMethods.PySequenceMethods.sq_inplace_repeat" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PySequenceMethods.sq_inplace_repeat">
+<a class="reference internal" href="#c.binaryfunc" title="binaryfunc">binaryfunc</a> <code class="descname">sq_inplace_repeat</code><a class="headerlink" href="#c.PySequenceMethods.sq_inplace_repeat" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function used to support <a class="reference external" href="https://docs.python.org/3/c-api/sequence.html#c.PySequence_InPlaceRepeat" title="(in Python v3.6)"><code class="xref c c-func docutils literal"><span class="pre">PySequence_InPlaceRepeat()</span></code></a>. It
 should modify <code class="docutils literal"><span class="pre">self</span></code> in place and then return <code class="docutils literal"><span class="pre">self</span></code>. This function
 is like <code class="docutils literal"><span class="pre">list</span> <span class="pre">*=</span> <span class="pre">int</span></code> in Python.</p>
@@ -965,7 +965,7 @@ getiterfunc <code class="descname">PyTypeObject.tp_iter</code><a class="headerli
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Objects may still be iterable without this function set if the support the
-Sequence Protocol. The <code class="xref c c-func docutils literal"><span class="pre">PySequenceMethods.sq_item()</span></code> function will
+Sequence Protocol. The <a class="reference internal" href="#c.PySequenceMethods.sq_item" title="PySequenceMethods.sq_item"><code class="xref c c-func docutils literal"><span class="pre">PySequenceMethods.sq_item()</span></code></a> function will
 be used from 0 until an <code class="xref c c-data docutils literal"><span class="pre">PyExc_IndexError</span></code> is raised just like in
 Python with <code class="docutils literal"><span class="pre">__getitem__</span></code>.</p>
 </div>
@@ -1007,14 +1007,14 @@ list, a descriptor object will be created and stored in the
 <dd><p>A structure which defines a descriptor for exposing a C member as a Python
 member.</p>
 <dl class="member">
-<dt id="c.PyMemberDef.PyMemberDef.name">
-char* <code class="descname">PyMemberDef.name</code><a class="headerlink" href="#c.PyMemberDef.PyMemberDef.name" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyMemberDef.name">
+char* <code class="descname">name</code><a class="headerlink" href="#c.PyMemberDef.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>The name of the member as a C string.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyMemberDef.PyMemberDef.type">
-int <code class="descname">PyMemberDef.type</code><a class="headerlink" href="#c.PyMemberDef.PyMemberDef.type" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyMemberDef.type">
+int <code class="descname">type</code><a class="headerlink" href="#c.PyMemberDef.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>The type code of the member.</p>
 <dl class="macro">
 <dt id="c.T_SHORT">
@@ -1141,15 +1141,15 @@ length 1.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyMemberDef.PyMemberDef.offset">
-<a class="reference internal" href="#c.Py_ssize_t" title="Py_ssize_t">Py_ssize_t</a> <code class="descname">PyMemberDef.offset</code><a class="headerlink" href="#c.PyMemberDef.PyMemberDef.offset" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyMemberDef.offset">
+<a class="reference internal" href="#c.Py_ssize_t" title="Py_ssize_t">Py_ssize_t</a> <code class="descname">offset</code><a class="headerlink" href="#c.PyMemberDef.offset" title="Permalink to this definition">¶</a></dt>
 <dd><p>The offset into the C structure where this member appears. You should
 always compute this offset with the <code class="docutils literal"><span class="pre">offsetof</span></code> operator.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyMemberDef.PyMemberDef.flags">
-int <code class="descname">PyMemberDef.flags</code><a class="headerlink" href="#c.PyMemberDef.PyMemberDef.flags" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyMemberDef.flags">
+int <code class="descname">flags</code><a class="headerlink" href="#c.PyMemberDef.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flag bits for indicating read or write status. The options are <code class="docutils literal"><span class="pre">0</span></code>
 for read and write access or <code class="xref c c-macro docutils literal"><span class="pre">READONLY</span></code> for read only access.</p>
 <p><a class="reference internal" href="#c.T_STRING" title="T_STRING"><code class="xref c c-macro docutils literal"><span class="pre">T_STRING</span></code></a> forces <code class="xref c c-macro docutils literal"><span class="pre">READONLY</span></code>.</p>
@@ -2036,27 +2036,27 @@ int <code class="descname">PyList_Reverse</code><span class="sig-paren">(</span>
 <p>Structure used to describe a method of an extension type. This structure has
 four fields.</p>
 <dl class="member">
-<dt id="c.PyMethodDef.PyMethodDef.ml_name">
-char* <code class="descname">PyMethodDef.ml_name</code><a class="headerlink" href="#c.PyMethodDef.PyMethodDef.ml_name" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyMethodDef.ml_name">
+char* <code class="descname">ml_name</code><a class="headerlink" href="#c.PyMethodDef.ml_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>The name of the method as a C string.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyMethodDef.PyMethodDef.ml_meth">
-<a class="reference internal" href="#c.PyCFunction" title="PyCFunction">PyCFunction</a> <code class="descname">PyMethodDef.ml_meth</code><a class="headerlink" href="#c.PyMethodDef.PyMethodDef.ml_meth" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyMethodDef.ml_meth">
+<a class="reference internal" href="#c.PyCFunction" title="PyCFunction">PyCFunction</a> <code class="descname">ml_meth</code><a class="headerlink" href="#c.PyMethodDef.ml_meth" title="Permalink to this definition">¶</a></dt>
 <dd><p>A pointer to the C implmenetation of the method.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyMethodDef.PyMethodDef.ml_flags">
-int <code class="descname">PyMethodDef.ml_flags</code><a class="headerlink" href="#c.PyMethodDef.PyMethodDef.ml_flags" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flag bits indicating how to call <code class="xref c c-member docutils literal"><span class="pre">ml_meth</span></code> should
+<dt id="c.PyMethodDef.ml_flags">
+int <code class="descname">ml_flags</code><a class="headerlink" href="#c.PyMethodDef.ml_flags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag bits indicating how to call <a class="reference internal" href="#c.PyMethodDef.ml_meth" title="PyMethodDef.ml_meth"><code class="xref c c-member docutils literal"><span class="pre">ml_meth</span></code></a> should
 be called or bound to a class.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyMethodDef.PyMethodDef.ml_doc">
-char* <code class="descname">PyMethodDef.ml_doc</code><a class="headerlink" href="#c.PyMethodDef.PyMethodDef.ml_doc" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyMethodDef.ml_doc">
+char* <code class="descname">ml_doc</code><a class="headerlink" href="#c.PyMethodDef.ml_doc" title="Permalink to this definition">¶</a></dt>
 <dd><p>The contents of the method&#8217;s docstring as a C string. If this is
 <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code>, the docstring will be <code class="docutils literal"><span class="pre">None</span></code> in Python. This should be
 created with <a class="reference internal" href="#c.PyDoc_STRVAR" title="PyDoc_STRVAR"><code class="xref c c-func docutils literal"><span class="pre">PyDoc_STRVAR()</span></code></a>.</p>
@@ -2153,66 +2153,66 @@ reference.</p>
 <code class="descname">PyModuleDef</code><a class="headerlink" href="#c.PyModuleDef" title="Permalink to this definition">¶</a></dt>
 <dd><p>A specification of a Python module object.</p>
 <dl class="member">
-<dt id="c.PyModuleDef.PyModuleDef.m_base">
-PyModuleDef_Base <code class="descname">PyModuleDef.m_base</code><a class="headerlink" href="#c.PyModuleDef.PyModuleDef.m_base" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyModuleDef.m_base">
+PyModuleDef_Base <code class="descname">m_base</code><a class="headerlink" href="#c.PyModuleDef.m_base" title="Permalink to this definition">¶</a></dt>
 <dd><p>The part of the module definition managed by CPython. Always initialize
 this with <code class="docutils literal"><span class="pre">PyModuleDef_HEAD_INIT</span></code>.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyModuleDef.PyModuleDef.m_name">
-char* <code class="descname">PyModuleDef.m_name</code><a class="headerlink" href="#c.PyModuleDef.PyModuleDef.m_name" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyModuleDef.m_name">
+char* <code class="descname">m_name</code><a class="headerlink" href="#c.PyModuleDef.m_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>The name of the module as a C string.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyModuleDef.PyModuleDef.m_doc">
-char* <code class="descname">PyModuleDef.m_doc</code><a class="headerlink" href="#c.PyModuleDef.PyModuleDef.m_doc" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyModuleDef.m_doc">
+char* <code class="descname">m_doc</code><a class="headerlink" href="#c.PyModuleDef.m_doc" title="Permalink to this definition">¶</a></dt>
 <dd><p>The docstring of the module as a C string. If set to <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> this
 will be <code class="docutils literal"><span class="pre">None</span></code> in Python This should be created with
 <a class="reference internal" href="#c.PyDoc_STRVAR" title="PyDoc_STRVAR"><code class="xref c c-func docutils literal"><span class="pre">PyDoc_STRVAR()</span></code></a>.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyModuleDef.PyModuleDef.m_size">
-<a class="reference internal" href="#c.Py_ssize_t" title="Py_ssize_t">Py_ssize_t</a> <code class="descname">PyModuleDef.m_size</code><a class="headerlink" href="#c.PyModuleDef.PyModuleDef.m_size" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyModuleDef.m_size">
+<a class="reference internal" href="#c.Py_ssize_t" title="Py_ssize_t">Py_ssize_t</a> <code class="descname">m_size</code><a class="headerlink" href="#c.PyModuleDef.m_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>The size of the module&#8217;s global state. If set to -1 this will not allocate
 any space for global state.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyModuleDef.PyModuleDef.m_methods">
-<a class="reference internal" href="#c.PyMethodDef" title="PyMethodDef">PyMethodDef</a>* <code class="descname">PyModuleDef.m_methods</code><a class="headerlink" href="#c.PyModuleDef.PyModuleDef.m_methods" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyModuleDef.m_methods">
+<a class="reference internal" href="#c.PyMethodDef" title="PyMethodDef">PyMethodDef</a>* <code class="descname">m_methods</code><a class="headerlink" href="#c.PyModuleDef.m_methods" title="Permalink to this definition">¶</a></dt>
 <dd><p>A <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> terminated array of methods to put in this module.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyModuleDef.PyModuleDef.m_slots">
-<a class="reference external" href="https://docs.python.org/3/c-api/module.html#c.PyModuleDef_Slot" title="(in Python v3.6)">PyModuleDef_Slot</a>* <code class="descname">PyModuleDef.m_slots</code><a class="headerlink" href="#c.PyModuleDef.PyModuleDef.m_slots" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyModuleDef.m_slots">
+<a class="reference external" href="https://docs.python.org/3/c-api/module.html#c.PyModuleDef_Slot" title="(in Python v3.6)">PyModuleDef_Slot</a>* <code class="descname">m_slots</code><a class="headerlink" href="#c.PyModuleDef.m_slots" title="Permalink to this definition">¶</a></dt>
 <dd><p>A <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> terminated array of slots for using multi-phase
 initialization. This is not used in this tutorial and can be set to
 <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code>.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyModuleDef.PyModuleDef.m_traverse">
-<a class="reference external" href="https://docs.python.org/3/c-api/gcsupport.html#c.traverseproc" title="(in Python v3.6)">traverseproc</a> <code class="descname">PyModuleDef.m_traverse</code><a class="headerlink" href="#c.PyModuleDef.PyModuleDef.m_traverse" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyModuleDef.m_traverse">
+<a class="reference external" href="https://docs.python.org/3/c-api/gcsupport.html#c.traverseproc" title="(in Python v3.6)">traverseproc</a> <code class="descname">m_traverse</code><a class="headerlink" href="#c.PyModuleDef.m_traverse" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function used for traversing the global state allocated with
-<a class="reference external" href="https://docs.python.org/3/c-api/module.html#c.PyModuleDef.m_size" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">m_size</span></code></a>. This can be <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> if not needed.</p>
+<a class="reference internal" href="#c.PyModuleDef.m_size" title="PyModuleDef.m_size"><code class="xref c c-member docutils literal"><span class="pre">m_size</span></code></a>. This can be <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> if not needed.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyModuleDef.PyModuleDef.m_clear">
-<a class="reference internal" href="#c.inquiry" title="inquiry">inquiry</a> <code class="descname">PyModuleDef.m_clear</code><a class="headerlink" href="#c.PyModuleDef.PyModuleDef.m_clear" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyModuleDef.m_clear">
+<a class="reference internal" href="#c.inquiry" title="inquiry">inquiry</a> <code class="descname">m_clear</code><a class="headerlink" href="#c.PyModuleDef.m_clear" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function used for clearing the global state allocated with
-<a class="reference external" href="https://docs.python.org/3/c-api/module.html#c.PyModuleDef.m_size" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">m_size</span></code></a>. This can be <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> if not needed.</p>
+<a class="reference internal" href="#c.PyModuleDef.m_size" title="PyModuleDef.m_size"><code class="xref c c-member docutils literal"><span class="pre">m_size</span></code></a>. This can be <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> if not needed.</p>
 </dd></dl>
 
 <dl class="member">
-<dt id="c.PyModuleDef.PyModuleDef.m_free">
-freefunc <code class="descname">PyModuleDef.m_free</code><a class="headerlink" href="#c.PyModuleDef.PyModuleDef.m_free" title="Permalink to this definition">¶</a></dt>
+<dt id="c.PyModuleDef.m_free">
+freefunc <code class="descname">m_free</code><a class="headerlink" href="#c.PyModuleDef.m_free" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function used for freeing the global state allocated with
-<a class="reference external" href="https://docs.python.org/3/c-api/module.html#c.PyModuleDef.m_size" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">m_size</span></code></a>. This can be <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> if not needed.</p>
+<a class="reference internal" href="#c.PyModuleDef.m_size" title="PyModuleDef.m_size"><code class="xref c c-member docutils literal"><span class="pre">m_size</span></code></a>. This can be <code class="xref c c-data docutils literal"><span class="pre">NULL</span></code> if not needed.</p>
 </dd></dl>
 
 </dd></dl>

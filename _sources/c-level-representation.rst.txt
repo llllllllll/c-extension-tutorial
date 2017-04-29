@@ -18,9 +18,9 @@ The ``PyObject`` struct is defined as:
 The :c:member:`~PyObject.ob_type` field is a pointer to the Python type for the
 object. This is how objects communicate their runtime type. For example: if a
 given :c:type:`PyObject*` points to a unicode object, then the
-:c:member:`~PyObject.ob_type` field will be set to ``&PyUnicode_Type`` where
-``PyUnicode_Type`` is the Python ``unicode`` type. This should be accessed
-through :c:func:`Py_TYPE`.
+:c:member:`~PyObject.ob_type` field will be set to :c:data:`&PyUnicode_Type`
+where :c:data:`PyUnicode_Type` is the Python :class:`unicode` type. This should
+be accessed through :c:func:`Py_TYPE`.
 
 the :c:member:`~PyObject.ob_refcnt` is the :ref:`reference count <ref-count>` of
 the object. This is the number of places where this object is being used. This
@@ -40,15 +40,15 @@ Concrete Types
 
 :c:type:`PyObject*` is an abstract reference that can point to any type;
 however, we eventually need to actually store information on an object. Subtypes
-of ``object`` are represented by ``struct``\s whose first member is a
-``PyObject`` followed by any instance data needed.
+of :class:`object` are represented by ``struct``\s whose first member is a
+:c:type:`PyObject` followed by any instance data needed.
 
 In C, a pointer to a ``struct`` is equivalent to a pointer to its first member,
 this makes it safe to cast from a type defined this way to and from
-``PyObject*``.
+:c:type:`PyObject*`.
 
 Users rarely need to use the more specialized type when working with the CPython
 API because most APIs expect and return plain :c:type:`PyObject*` values.
 
-One case where users often work with a concrete type is :c:type:`PyTypeObject*`
-which is the result of :c:func:`Py_TYPE`.
+One exception where users often work with a concrete type is
+:c:type:`PyTypeObject*` which is the result of :c:func:`Py_TYPE`.

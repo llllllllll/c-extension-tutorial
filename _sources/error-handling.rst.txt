@@ -71,7 +71,7 @@ references and then return :c:data:`NULL` or some other sentinel to indicate
 that our function failed.
 
 There are also helpers for raising common exceptions like:
-:c:func:`PyErr_MemoryError`.
+:c:func:`PyErr_NoMemory`.
 
 Standard Exceptions
 ~~~~~~~~~~~~~~~~~~~

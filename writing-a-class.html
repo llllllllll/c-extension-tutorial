@@ -189,10 +189,10 @@ maintain.</p>
 <p>A type or class in Python holds the size in bytes to allocate for each new
 instance and a virtual function table to resolve methods.</p>
 <p>If we think back to the layout of a <a class="reference internal" href="appendix.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal"><span class="pre">PyObject</span></code></a>, we have at least two
-fields: <a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_type" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">PyObject.ob_type</span></code></a>, a pointer to the type for the instance,
-and then <a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_refcnt" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">PyObject.ob_refcnt</span></code></a>, the number of references to this
+fields: <a class="reference internal" href="appendix.html#c.PyObject.ob_type" title="PyObject.ob_type"><code class="xref c c-member docutils literal"><span class="pre">PyObject.ob_type</span></code></a>, a pointer to the type for the instance,
+and then <a class="reference internal" href="appendix.html#c.PyObject.ob_refcnt" title="PyObject.ob_refcnt"><code class="xref c c-member docutils literal"><span class="pre">PyObject.ob_refcnt</span></code></a>, the number of references to this
 object. The instance knows how to find the implementation for all of the methods
-by looking up its own type from the <a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_type" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">PyObject.ob_type</span></code></a> field and then
+by looking up its own type from the <a class="reference internal" href="appendix.html#c.PyObject.ob_type" title="PyObject.ob_type"><code class="xref c c-member docutils literal"><span class="pre">PyObject.ob_type</span></code></a> field and then
 finding the given method in the type object.</p>
 <p>For example: given the Python expression: <code class="docutils literal"><span class="pre">repr(ob)</span></code>, we can start by
 converting that into the equivalent C API call:
@@ -277,7 +277,7 @@ what you are trying to do.</p>
 <div class="section" id="garbage-collection">
 <h3>Garbage Collection<a class="headerlink" href="#garbage-collection" title="Permalink to this headline">¶</a></h3>
 <p>While CPython uses a reference counting system where objects are deallocated as
-soon as their <a class="reference external" href="https://docs.python.org/3/c-api/typeobj.html#c.PyObject.ob_refcnt" title="(in Python v3.6)"><code class="xref c c-member docutils literal"><span class="pre">PyObject.ob_refcnt</span></code></a> hits 0, there are cases where a
+soon as their <a class="reference internal" href="appendix.html#c.PyObject.ob_refcnt" title="PyObject.ob_refcnt"><code class="xref c c-member docutils literal"><span class="pre">PyObject.ob_refcnt</span></code></a> hits 0, there are cases where a
 cycle can form between objects which needs to be manually broken.</p>
 <p>Classes implemented in C can hook into this machinery by implementing
 <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_traverse" title="PyTypeObject.tp_traverse"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_traverse</span></code></a> and <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_clear" title="PyTypeObject.tp_clear"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_clear</span></code></a>

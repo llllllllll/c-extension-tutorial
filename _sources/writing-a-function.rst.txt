@@ -26,8 +26,8 @@ Let's begin with a simple C function to compute Fibonacci numbers:
    }
 
 Now that we have a a C function we need to provide a way to convert our
-:c:type:`PyObject*`\s to and from C :c:type:`unsigned long` objects to invoke this
-from Python.
+:c:type:`PyObject*`\s to and from C :c:type:`unsigned long` objects to invoke
+this from Python.
 
 .. note::
 
@@ -43,9 +43,9 @@ Python :c:type:`int` objects are concretely typed as a :c:type:`PyLongObject`.
 .. note::
 
    Python :c:type:`int` objects are called :c:type:`PyLongObject` in the C API
-   as a holdover from when :c:type:`int` and :c:type:`long` were different in
-   Python 2. In Python 3: :c:type:`int` is arbitrarily sized like the old Python
-   2 :c:type:`long`.
+   as a holdover from when :class:`int` and :class:`long` were different in
+   Python 2. In Python 3: :class:`int` is arbitrarily sized like the old Python
+   2 :class:`long`.
 
 Adapting Long Objects
 ---------------------
@@ -59,8 +59,8 @@ We can then write a wrapping function to do this conversion for us:
 
 .. code-block:: c
 
-   static PyObject *
-   pyfib(PyObject *self, PyObject *n)
+   static PyObject*
+   pyfib(PyObject* self, PyObject* n)
    {
        unsigned long as_unsigned_long = PyLong_AsUnsignedLong(n);
        PyObject *result = PyLong_FromUnsignedLong(cfib(as_unsigned));
