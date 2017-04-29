@@ -1,8 +1,22 @@
 Appendix
 ========
 
-Glossary
---------
+Reference Counting
+------------------
+
+.. _ref-count:
+
+Reference Count
+~~~~~~~~~~~~~~~
+
+The number of references to a given object. This is the count of objects which
+refer to the given object.
+
+When an object is created, its reference count starts at one, which is the
+reference owned by the creator. The reference count can be increased with
+:c:func:`Py_INCREF` or decreased with :c:func:`Py_DECREF`. As soon as the
+reference count reaches zero, the object is no longer needed and it will be
+deallocated.
 
 .. _new-reference:
 
@@ -38,24 +52,6 @@ An example of this pattern is :c:func:`PyList_SetItem`. This function steals a
 reference to the ``value`` argument. This is to make it easier to allocate new
 objects and put them right into a :c:type:`PyListObject` without needing extra
 calls to :c:func:`Py_INCREF`.
-
-Reference Counting
-------------------
-
-.. _ref-count:
-
-Reference Count
-~~~~~~~~~~~~~~~
-
-The number of references to a given object. This is the count of objects which
-refer to the given object.
-
-When an object is created, its reference count starts at one, which is the
-reference owned by the creator. The reference count can be increased with
-:c:func:`Py_INCREF` or decreased with :c:func:`Py_DECREF`. As soon as the
-reference count reaches zero, the object is no longer needed and it will be
-deallocated.
-
 
 ``Py_INCREF``
 ~~~~~~~~~~~~~
