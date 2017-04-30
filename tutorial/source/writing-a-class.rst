@@ -102,7 +102,7 @@ While many slots have a 1:1 correspondence with a Python special method, there
 are a few extra slots that we can control when writing a type in C.
 
 Allocation and Deallocation
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Part of the definition of a class is how to allocate and deallocate
 instances. This is controlled through the :c:member:`PyTypeObject.tp_alloc` and
