@@ -1,0 +1,20 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "fedora/25-cloud-base"
+  config.vm.box_check_update = true
+
+  config.vm.synced_folder(
+    "../../c-extension-tutorial", "/home/vagrant/c-extension-tutorial"
+  )
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.gui = true
+    vb.name = "c_extension_tutorial"
+    vb.memory = 2048
+    vb.cpus = 2
+  end
+
+  config.vm.provision("shell", path: "provision_c_ext_tut_vm.sh", run: "always")
+end
