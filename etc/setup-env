@@ -6,10 +6,13 @@
     # build a debug version of CPython
     pushd submodules/cpython
 
-    if [ `uname` == "Linux" ];then
+    if [ `uname`=="Linux" ];then
         PYTHON_EXE=python
         ./configure --with-pydebug
-    elif [ `uname` == "Darwin" ];then
+    elif [ `uname`=="Darwin" ];then
+        # install some required packages
+        brew install openssl xz
+
         PYTHON_EXE=python.exe
         CPPFLAGS="-I$(brew --prefix openssl)/include" \
                 LDFLAGS="-L$(brew --prefix openssl)/lib" \
@@ -28,14 +31,38 @@
     # add the python gdb debug script next to python binary in the venv
     cp submodules/cpython/Tools/gdb/libpython.py venv/bin/python-gdb.py
 
+    # activate our venv
     source venv/bin/activate
+
+    # pip install the things needed to build the docs; ipython is for people
+    # to use during the exercises
     pip install ipython
     pip install sphinx
     pip install sphinx-rtd-theme
 
+    # build the sphinx project
     pushd tutorial
     make html
     popd
+
+    # make sure we can actually build stuff with this CPython
+    pushd exercises/fib
+    PYTHON_ASSERTION="
+from fib import fib
+assert fib(10) == 55, 'fib returned and unexpected value'
+"
+    if python setup.py build_ext --inplace && \
+            python -c "$PYTHON_ASSERTION";then
+        rm -r build/
+        printf '\n\nEnvironment is setup correctly!\n'
+    fi
+    popd
 )
 
-source venv/bin/activate
+if [ $? ];then
+    # only activate the venv if the install steps worked, otherwise we mask the
+    # error
+    source venv/bin/activate
+else
+    printf '\n\nEnvironment is **not** setup correctly!\n'
+fi

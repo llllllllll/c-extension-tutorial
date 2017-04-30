@@ -41,6 +41,13 @@ The ``setup-env`` script will compile a debug version of CPython 3.6 and create
 a local virtual env with this new interpreter. This ensures that everyone is
 using the same version of CPython with the same compile time flags.
 
+the ``setup-env`` should print a lot of stuff to the terminal. You can ignore
+most of it but the last line should be:
+
+.. code-block:: text
+
+   Environment is setup correctly!
+
 Viewing the Tutorial
 --------------------
 
