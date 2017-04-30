@@ -98,7 +98,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Writing a New Class in C</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#instance-data">Instance Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#slots-without-a-python-equivalent">Slots Without a Python Equivalent</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#allocation-an-deallocation">Allocation an Deallocation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#allocation-and-deallocation">Allocation and Deallocation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#garbage-collection">Garbage Collection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#flags">Flags</a></li>
 </ul>
@@ -202,7 +202,7 @@ call:</p>
 </pre></div>
 </div>
 <p>Walking through this line, we start by getting a reference to the type of <code class="docutils literal"><span class="pre">ob</span></code>
-with <a class="reference internal" href="appendix.html#c.Py_TYPE" title="Py_TYPE"><code class="xref c c-func docutils literal"><span class="pre">Py_TYPE()</span></code></a>. We then lookup the <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_repr" title="PyTypeObject.tp_repr"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_repr</span></code></a> slot
+with <a class="reference internal" href="appendix.html#c.Py_TYPE" title="Py_TYPE"><code class="xref c c-func docutils literal"><span class="pre">Py_TYPE()</span></code></a>. We then look up the <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_repr" title="PyTypeObject.tp_repr"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_repr</span></code></a> slot
 from the type of <code class="docutils literal"><span class="pre">ob</span></code> which is the implementation <a class="reference external" href="https://docs.python.org/3/library/functions.html#repr" title="(in Python v3.6)"><code class="xref py py-func docutils literal"><span class="pre">repr()</span></code></a> for <code class="docutils literal"><span class="pre">ob</span></code>.</p>
 <p>There are slots for many of the builtin functions, for example:</p>
 <ul class="simple">
@@ -223,7 +223,7 @@ example, given the class:</p>
 </pre></div>
 </div>
 <p>we know that there is a slot to hold <code class="docutils literal"><span class="pre">__repr__</span></code>, but what about
-<code class="docutils literal"><span class="pre">method</span></code>. This is not a special method that CPython uses so there is no
+<code class="docutils literal"><span class="pre">method</span></code>? This is not a special method that CPython uses so there is no
 reserved slot in the <a class="reference internal" href="appendix.html#c.PyTypeObject" title="PyTypeObject"><code class="xref c c-type docutils literal"><span class="pre">PyTypeObject</span></code></a> struct. For these more free form
 methods, types keep a Python dictionary object in the slot
 <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_dict" title="PyTypeObject.tp_dict"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_dict</span></code></a> from name to function object. Dispatching
@@ -260,8 +260,8 @@ field, a <a class="reference internal" href="appendix.html#c.Py_ssize_t" title="
 <h2>Slots Without a Python Equivalent<a class="headerlink" href="#slots-without-a-python-equivalent" title="Permalink to this headline">¶</a></h2>
 <p>While many slots have a 1:1 correspondence with a Python special method, there
 are a few extra slots that we can control when writing a type in C.</p>
-<div class="section" id="allocation-an-deallocation">
-<h3>Allocation an Deallocation<a class="headerlink" href="#allocation-an-deallocation" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="allocation-and-deallocation">
+<h3>Allocation and Deallocation<a class="headerlink" href="#allocation-and-deallocation" title="Permalink to this headline">¶</a></h3>
 <p>Part of the definition of a class is how to allocate and deallocate
 instances. This is controlled through the <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_alloc" title="PyTypeObject.tp_alloc"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_alloc</span></code></a> and
 <a class="reference internal" href="appendix.html#c.PyTypeObject.tp_free" title="PyTypeObject.tp_free"><code class="xref c c-member docutils literal"><span class="pre">PyTypeObject.tp_free</span></code></a> slots.</p>
