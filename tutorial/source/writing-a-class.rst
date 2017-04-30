@@ -31,7 +31,7 @@ call:
    PyObject* result = Py_TYPE(ob)->tp_repr(ob);
 
 Walking through this line, we start by getting a reference to the type of ``ob``
-with :c:func:`Py_TYPE`. We then lookup the :c:member:`PyTypeObject.tp_repr` slot
+with :c:func:`Py_TYPE`. We then look up the :c:member:`PyTypeObject.tp_repr` slot
 from the type of ``ob`` which is the implementation :func:`repr` for ``ob``.
 
 There are slots for many of the builtin functions, for example:
@@ -56,7 +56,7 @@ example, given the class:
            return 'something'
 
 we know that there is a slot to hold ``__repr__``, but what about
-``method``. This is not a special method that CPython uses so there is no
+``method``? This is not a special method that CPython uses so there is no
 reserved slot in the :c:type:`PyTypeObject` struct. For these more free form
 methods, types keep a Python dictionary object in the slot
 :c:member:`PyTypeObject.tp_dict` from name to function object. Dispatching
@@ -101,7 +101,7 @@ Slots Without a Python Equivalent
 While many slots have a 1:1 correspondence with a Python special method, there
 are a few extra slots that we can control when writing a type in C.
 
-Allocation an Deallocation
+Allocation and Deallocation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Part of the definition of a class is how to allocate and deallocate
