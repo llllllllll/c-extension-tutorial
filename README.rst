@@ -71,6 +71,7 @@ virtual machine.
 First install Vagrant 1.9 and Virtualbox 5.1:
 
 https://www.vagrantup.com/downloads.html
+
 https://www.virtualbox.org/wiki/Downloads
 
 Then run the following commands in your terminal:
