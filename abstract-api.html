@@ -214,10 +214,9 @@ write:</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">PyObject</span><span class="o">*</span> <span class="n">a</span><span class="p">;</span>  <span class="cm">/* ... */</span>
 <span class="n">PyObject</span><span class="o">*</span> <span class="n">b</span><span class="p">;</span>  <span class="cm">/* ... */</span>
 
-<span class="n">PyObject</span><span class="o">*</span> <span class="n">result</span> <span class="o">=</span> <span class="n">PyObject_RichCompare</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">py_LE</span><span class="p">);</span>
+<span class="n">PyObject</span><span class="o">*</span> <span class="n">result</span> <span class="o">=</span> <span class="n">PyObject_RichCompare</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">Py_LE</span><span class="p">);</span>
 <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">result</span><span class="p">)</span> <span class="p">{</span>
     <span class="cm">/* error handling */</span>
-    <span class="n">Py_DECREF</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
 <span class="p">}</span>
 <span class="cm">/* do stuff with ``result`` */</span>
 <span class="n">Py_DECREF</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
@@ -234,7 +233,7 @@ rewrite the above example with <a class="reference internal" href="appendix.html
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">PyObject</span><span class="o">*</span> <span class="n">a</span><span class="p">;</span>  <span class="cm">/* ... */</span>
 <span class="n">PyObject</span><span class="o">*</span> <span class="n">b</span><span class="p">;</span>  <span class="cm">/* ... */</span>
 
-<span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="n">PyObject_RichCompareBool</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">py_LE</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="n">PyObject_RichCompareBool</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">Py_LE</span><span class="p">);</span>
 <span class="k">if</span> <span class="p">(</span><span class="n">result</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
     <span class="cm">/* error handling */</span>
 <span class="p">}</span>
