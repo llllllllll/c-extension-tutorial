@@ -27,3 +27,6 @@ htmlcov
 venv/
 
 .vagrant
+
+# PyCharm settings dir
+.idea
