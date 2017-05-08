@@ -4,16 +4,16 @@
     # build a debug version of CPython
     pushd submodules/cpython
 
-    if [ `uname`=="Linux" ];then
+    if [ `uname` = "Linux" ];then
         PYTHON_EXE=python
         ./configure --with-pydebug
-    elif [ `uname`=="Darwin" ];then
+    elif [ `uname` = "Darwin" ];then
         # install some required packages
         brew install openssl xz
 
         PYTHON_EXE=python.exe
-        CPPFLAGS="-I$(brew --prefix openssl)/include" \
-                LDFLAGS="-L$(brew --prefix openssl)/lib" \
+        CPPFLAGS="-I/opt/X11/include -I$(brew --prefix openssl)/include $(CPPFLAGS)" \
+                LDFLAGS="-L/opt/X11/lib -L$(brew --prefix openssl)/lib $(LDFLAGS)" \
                 ./configure --with-pydebug
     else
         echo "Only GNU+Linux and OSX are supported"
@@ -57,7 +57,7 @@ assert fib(10) == 55, 'fib returned and unexpected value'
     popd
 )
 
-if [ $? ];then
+if [ $? -eq 0 ];then
     # only activate the venv if the install steps worked, otherwise we mask the
     # error
     source venv/bin/activate
