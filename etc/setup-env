@@ -65,5 +65,8 @@ if [ $? -eq 0 ];then
     # error
     source venv/bin/activate
 else
-    printf '\n\nEnvironment is **not** setup correctly!\n'
+    BOLD=$(tput bold)
+    RED=$(tput setaf 1)
+    NORMAL=$(tput sgr0)
+    printf "\n\nEnvironment is $BOLD$RED**not**$NORMAL setup correctly!\n"
 fi
