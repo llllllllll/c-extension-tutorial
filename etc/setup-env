@@ -43,6 +43,8 @@
     make html
     popd
 
+    ROOT=$PWD
+
     # make sure we can actually build stuff with this CPython
     pushd exercises/fib
     PYTHON_ASSERTION="
@@ -52,6 +54,7 @@ assert fib(10) == 55, 'fib returned and unexpected value'
     if python setup.py build_ext --inplace && \
             python -c "$PYTHON_ASSERTION";then
         rm -r build/
+        printf "\nvirtual environment created successfully: $(find $ROOT -maxdepth 1 -name venv)\n"
         printf '\n\nEnvironment is setup correctly!\n'
     fi
     popd
