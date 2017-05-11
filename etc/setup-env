@@ -12,8 +12,8 @@
         brew install openssl xz
 
         PYTHON_EXE=python.exe
-        CPPFLAGS="-I/opt/X11/include -I$(brew --prefix openssl)/include $(CPPFLAGS)" \
-                LDFLAGS="-L/opt/X11/lib -L$(brew --prefix openssl)/lib $(LDFLAGS)" \
+        CPPFLAGS="-I/opt/X11/include -I$(brew --prefix openssl)/include $CPPFLAGS" \
+                LDFLAGS="-L/opt/X11/lib -L$(brew --prefix openssl)/lib $LDFLAGS" \
                 ./configure --with-pydebug
     else
         echo "Only GNU+Linux and OSX are supported"
