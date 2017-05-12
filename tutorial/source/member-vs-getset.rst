@@ -69,13 +69,22 @@ we could add an attribute which could only store positive values.
    static int
    mytype_set_float_field(mytype* self, PyObject* value, void* closure)
    {
-       float f = PyFloat_AsFloat(value);
+       float f;
+
+       if (!value) {
+           PyErr_SetString(PyExc_AttributeError, "cannot delete float_field");
+       }
+
+       f = PyFloat_AsFloat(value);
        if (PyErr_Occurred()) {
            return -1;
        }
 
        if (f < 0) {
-           PyErr_SetString(PyExc_ValueError, "float_field must be positive");
+           PyErr_Format(PyExc_ValueError,
+                        "float_field must be positive, got: %f",
+                        f);
+           return -1;
        }
 
        self->float_field = f;
