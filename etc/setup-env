@@ -5,6 +5,28 @@
     pushd submodules/cpython
 
     if [ `uname` = "Linux" ];then
+        BUILD_DEP=''
+        INSTALL=''
+        if command -v pacman;then
+            INSTALL='pacman -S --noconfirm xz'
+        elif command -v dnf; then
+            BUILD_DEP='dnf builddep -y'
+            INSTALL='dnf install -y'
+        elif command -v apt-get;then
+            BUILD_DEP='apt-get build-dep --assume-yes'
+            INSTALL='apt-get install --assume-yes'
+        fi
+
+        if [ -n "$BUILD_DEP" ];then
+            echo "running: sudo $BUILD_DEP python3"
+            sudo $BUILD_DEP python3
+        fi
+
+        if [ -n "$INSTALL" ];then
+            echo "running: sudo $INSTALL gdb"
+            sudo $INSTALL gdb
+        fi
+
         PYTHON_EXE=python
         ./configure --with-pydebug
     elif [ `uname` = "Darwin" ];then
@@ -68,5 +90,11 @@ else
     BOLD=$(tput bold)
     RED=$(tput setaf 1)
     NORMAL=$(tput sgr0)
+    if [ $? -ne 0 ];then
+        # don't fail to print at all because of tput
+        BOLD=''
+        RED=''
+        NORMAL=''
+    fi
     printf "\n\nEnvironment is $BOLD$RED**not**$NORMAL setup correctly!\n"
 fi

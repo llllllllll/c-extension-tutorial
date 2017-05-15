@@ -22,7 +22,7 @@ Install Steps
 -------------
 
 Prior to the tutorial, attendees need to install a git, a C89 compatible C
-compiler and gdb. OSX users will also need to install ``brew``.
+compiler, and gdb. OSX users will also need to install ``brew``.
 
 For the C compiler: I recommend gcc, but clang works as well.
 The tutorial will be using gdb specific features so gdb is reqiured. Other C
@@ -37,11 +37,12 @@ in a terminal:
    $ cd c-extension-tutorial
    $ source etc/setup-env
 
-The ``setup-env`` script will compile a debug version of CPython 3.6 and create
-a local virtual env with this new interpreter. This ensures that everyone is
-using the same version of CPython with the same compile time flags.
+The ``setup-env`` script will attempt to download the needed dependencies,
+compile a debug version of CPython 3.6, and create a local virtual env with this
+new interpreter. This ensures that everyone is using the same version of CPython
+with the same compile time flags.
 
-the ``setup-env`` should print a lot of stuff to the terminal. You can ignore
+The ``setup-env`` should print a lot of stuff to the terminal. You can ignore
 most of it but the last line should be:
 
 .. code-block:: text
