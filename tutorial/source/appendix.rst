@@ -515,8 +515,8 @@ Fields
       static int
       mytype_traverse(mytype* self, visitproc visit, void* arg)
       {
-          Py_VISIT(self->mt_base);
           Py_VISIT(self->mt_object_member);
+          Py_VISIT(self->mt_other_object_member);
           /* note: not visiting self->mt_not_an_object because it is not a
              PyObject* */
           return 0;
@@ -559,8 +559,8 @@ Fields
       static int
       mytype_clear(mytype* self)
       {
-          Py_CLEAR(self->mt_base);
           Py_CLEAR(self->mt_object_member);
+          Py_CLEAR(self->mt_other_object_member);
           /* note: not clearing self->mt_not_an_object because it is not a
              PyObject* */
           return 0;
